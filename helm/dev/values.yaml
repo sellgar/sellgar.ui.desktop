@@ -12,3 +12,4 @@ configmaps:
       CLIENT_GATEWAY_URL=http://client-gateway:8080
       PUBLIC_CLIENT_GATEWAY_URL=https://dev.sellgar.ru/api/client
       PUBLIC_SOCKET_GATEWAY_URL=https://dev.sellgar.ru
+      PUBLIC_CDN_IMAGES_URL=https://cdn.dev.sellgar.ru/images

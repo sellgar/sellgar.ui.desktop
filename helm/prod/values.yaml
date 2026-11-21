@@ -11,3 +11,4 @@ configmaps:
       CLIENT_GATEWAY_URL=
       PUBLIC_CLIENT_GATEWAY_URL=
       PUBLIC_SOCKET_GATEWAY_URL=
+      PUBLIC_CDN_IMAGES_URL=https://cdn.sellgar.ru/images

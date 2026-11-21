@@ -5,7 +5,7 @@
 - В корне находятся Dockerfile, .github/ и helm/. Helm values и содержимое .env каждой среды принадлежат этому репозиторию; общий chart — инфраструктуре.
 - Runtime образа — standalone Next.js на Node.js 24, .env монтируется в /app/clients/desktop/.env и читается командой node --env-file=.env server.js.
 - CLIENT_GATEWAY_URL — серверный HTTP endpoint. PUBLIC_CLIENT_GATEWAY_URL и PUBLIC_SOCKET_GATEWAY_URL — только публичные адреса; StorefrontConfigState передаёт их в browser bootstrap. NEXT_PUBLIC_* для конфигурации среды не использовать: эти значения фиксируются сборкой.
-- Запросы SSR используют серверный endpoint; imageUrl формируются через отдельный public gateway URL. В snapshot не передаются private env или внутренний адрес gateway.
+- Запросы SSR используют серверный endpoint; imageUrl формируются через `PUBLIC_CDN_IMAGES_URL` (`https://cdn.dev.sellgar.ru/images` для dev). Публичный CDN передаётся через StorefrontConfigState; внутренний адрес gateway в snapshot не попадает. Без CDN env локальная разработка сохраняет прежние ссылки через public gateway.
 - HTTP-контракт витрины принадлежит client gateway (4030): `/v1/products`, `/v1/offers/:uuid`.
 - Runtime — nested submodule `library/sellgar.app.ui`, UI kit — `library/sellgar.kit.ui`.
 - `clients/desktop/src/application` владеет bootstrap и URL/config bindings; `withApp()` подключает Next-адаптер.
@@ -25,7 +25,7 @@
   не превращать их в фиксированные размеры/цвета.
 - Product/Variant properties: определения полей, типизированные `values[]`, опции
   с `code`, дополнения `TEXT/COLOR/IMAGE`. `ICON` — режим TEXT, не вид свойства.
-- Изображения variant и дополнений options разрешаются через публичный client gateway.
+- Изображения variant, дополнений options и Cart разрешаются через единый Config.getImageUrl. Config получает CDN URL от host; UI не собирает адреса самостоятельно.
 - Доменный CartService предоставляет HTTP-получение корзины, добавление, изменение количества и удаление позиции через client gateway. Страницы не вызывают его напрямую: они используют публичный CartWidgetServiceInterface из @widget/cart.
 - @widget/cart — единый владелец CartStore, команд изменения количества, состояния busy/error и CartChangesHub. CartBindings подключены в DesktopApplication, поэтому все модули получают один экземпляр сервиса на приложение; SSR-приложения изолированы.
 - CartApplicationProvider зарегистрирован через app.providers и предзагружает CartWidget существующим WidgetPreloader. CartProvider внутри виджета загружает корзину в prepare и активирует подписки после SessionInitializer; до завершения подготовки runtime не ready. На SSR корзина загружается в request-scoped приложении и сериализуется через CartApplicationState. Браузер восстанавливает снимок до провайдеров без повторного GET.

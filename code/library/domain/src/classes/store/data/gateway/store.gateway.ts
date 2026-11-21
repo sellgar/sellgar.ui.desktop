@@ -51,7 +51,7 @@ export class StoreGateway implements StoreGatewayInterface {
   }
 
   private toOffer(offer: StoreOfferEntity): Promise<StoreOfferEntity> {
-    return this.toEntity(StoreOfferEntity, StoreOfferMapper.toOffer(offer, this.config.getPublicGatewayUrl()));
+    return this.toEntity(StoreOfferEntity, StoreOfferMapper.toOffer(offer, this.config));
   }
 
   private async toEntity<T extends object>(type: ClassConstructor<T>, result: unknown): Promise<T> {

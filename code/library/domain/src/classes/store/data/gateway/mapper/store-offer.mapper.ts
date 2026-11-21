@@ -1,21 +1,20 @@
-import { resolveGatewayUrl } from '@library/domain/gateway-url';
-
+import type { ConfigInterface } from '../../../../../infrastructure/config/config.interface.ts';
 import type { ProductFieldEntity } from '../../../../product/index.ts';
 import type { StoreOfferEntity } from '../../../domain/store-offer.entity.ts';
 
 export class StoreOfferMapper {
-  static toOffer(offer: StoreOfferEntity, gatewayUrl: string): StoreOfferEntity {
+  static toOffer(offer: StoreOfferEntity, config: Pick<ConfigInterface, 'getImageUrl'>): StoreOfferEntity {
     return {
       ...offer,
-      product: { ...offer.product, properties: this.toFields(offer.product.properties, gatewayUrl) },
+      product: { ...offer.product, properties: this.toFields(offer.product.properties, config) },
       variant: {
         ...offer.variant,
-        properties: this.toFields(offer.variant.properties, gatewayUrl),
+        properties: this.toFields(offer.variant.properties, config),
         images: [...offer.variant.images]
           .sort((left, right) => left.order - right.order)
           .map((image) => ({
             ...image,
-            imageUrl: resolveGatewayUrl(image.imageUrl, gatewayUrl).toString(),
+            imageUrl: config.getImageUrl(image.imageUuid, image.imageUrl),
           })),
       },
       records: offer.records.map((record) => ({
@@ -25,7 +24,10 @@ export class StoreOfferMapper {
     };
   }
 
-  private static toFields(fields: ProductFieldEntity[], gatewayUrl: string): ProductFieldEntity[] {
+  private static toFields(
+    fields: ProductFieldEntity[],
+    config: Pick<ConfigInterface, 'getImageUrl'>,
+  ): ProductFieldEntity[] {
     return [...fields]
       .sort((left, right) => left.sortOrder - right.sortOrder)
       .map((field) => ({
@@ -38,10 +40,7 @@ export class StoreOfferMapper {
               .sort((left, right) => left.sortOrder - right.sortOrder)
               .map((extra) => ({
                 ...extra,
-                imageUrl:
-                  extra.type === 'IMAGE' && extra.imageUuid
-                    ? resolveGatewayUrl(`/v1/files/${encodeURIComponent(extra.imageUuid)}`, gatewayUrl).toString()
-                    : undefined,
+                imageUrl: extra.type === 'IMAGE' && extra.imageUuid ? config.getImageUrl(extra.imageUuid) : undefined,
               })),
           })),
         },

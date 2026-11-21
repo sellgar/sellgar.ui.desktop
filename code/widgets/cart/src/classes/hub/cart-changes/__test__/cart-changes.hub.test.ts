@@ -70,6 +70,7 @@ test('Cart Hub validates full cart snapshots without ready-triggered reads and r
     {
       getGatewayUrl: () => 'http://localhost:4030',
       getPublicGatewayUrl: () => 'http://localhost:4030',
+      getImageUrl: (imageUuid) => `https://cdn.example.test/images/${imageUuid}`,
       getSocketGatewayUrl: () => 'http://localhost:4040',
     },
     {
@@ -113,6 +114,7 @@ test('Cart Hub propagates a failed snapshot so the transport cannot acknowledge 
     {
       getGatewayUrl: () => 'http://localhost:4030',
       getPublicGatewayUrl: () => 'http://localhost:4030',
+      getImageUrl: (imageUuid) => `https://cdn.example.test/images/${imageUuid}`,
       getSocketGatewayUrl: () => 'http://localhost:4040',
     },
     {
@@ -138,6 +140,7 @@ test('Cart Hub prepares the product thumbnail from the snapshot without fetching
     {
       getGatewayUrl: () => 'http://localhost:4030',
       getPublicGatewayUrl: () => 'http://localhost:4030',
+      getImageUrl: (imageUuid) => `https://cdn.example.test/images/${imageUuid}`,
       getSocketGatewayUrl: () => 'http://localhost:4040',
     },
     {
@@ -179,6 +182,6 @@ test('Cart Hub prepares the product thumbnail from the snapshot without fetching
   assert.ok(handler);
   await handler({ ...cart, items: [item] }, delivery('cart.updated'));
   await handler({ ...cart, items: [{ ...item, imageUuid: null }] }, delivery('cart.updated'));
-  assert.deepEqual(images, [`http://localhost:4030/v1/files/${uuid}`, null]);
+  assert.deepEqual(images, [`https://cdn.example.test/images/${uuid}`, null]);
   await cleanup();
 });

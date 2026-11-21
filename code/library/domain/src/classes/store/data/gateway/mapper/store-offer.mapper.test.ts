@@ -7,13 +7,17 @@ import { instanceToPlain, plainToInstance } from 'class-transformer';
 
 import { ProductFieldEntity } from '@library/domain';
 
+import { Config } from '../../../../../infrastructure/config/config.ts';
 import type { StoreOfferEntity } from '../../../domain/store-offer.entity.ts';
 import { createStoreOffer, imageUuid } from '../__test__/store-offer.fixture.ts';
 import { StoreOfferMapper } from './store-offer.mapper.ts';
 
 const createOffer = createStoreOffer;
 
-const mapper = { toOffer: (offer: StoreOfferEntity) => StoreOfferMapper.toOffer(offer, 'http://localhost:4030') };
+const mapper = {
+  toOffer: (offer: StoreOfferEntity) =>
+    StoreOfferMapper.toOffer(offer, new Config('http://localhost:4030', 'http://localhost:4040')),
+};
 
 test('сохраняет отдельные записи, их артикулы, остатки и цену предложения', () => {
   const result = mapper.toOffer(createOffer());
@@ -118,5 +122,20 @@ test('разрешает изображения варианта и опций �
 
   assert.equal(field.property.options[0].extras[1].imageUrl, `http://localhost:4030/v1/files/${imageUuid}`);
   assert.equal(field.values[0].valueOptionCode, 'blue');
+  assert.deepEqual(instanceToPlain(source), before);
+
+  const cdnResult = StoreOfferMapper.toOffer(
+    source,
+    new Config('http://gateway.internal', 'https://socket.test', 'https://gateway.test', 'https://cdn.test/images'),
+  );
+
+  assert.deepEqual(
+    cdnResult.variant.images.map((image) => image.imageUrl),
+    [`https://cdn.test/images/${imageUuid}`, `https://cdn.test/images/${imageUuid}`],
+  );
+  assert.equal(
+    cdnResult.product.properties[0].property.options[0].extras[1].imageUrl,
+    `https://cdn.test/images/${imageUuid}`,
+  );
   assert.deepEqual(instanceToPlain(source), before);
 });

@@ -8,6 +8,7 @@ export class ConfigBinding extends BindingModuleInterface {
     private readonly gatewayUrl: string,
     private readonly socketGatewayUrl: string,
     private readonly publicGatewayUrl: string = gatewayUrl,
+    private readonly cdnImagesUrl?: string,
   ) {
     super();
   }
@@ -15,6 +16,6 @@ export class ConfigBinding extends BindingModuleInterface {
   register(registry: BindingRegistryInterface): void {
     registry
       .bind(ConfigInterface)
-      .toConstantValue(new Config(this.gatewayUrl, this.socketGatewayUrl, this.publicGatewayUrl));
+      .toConstantValue(new Config(this.gatewayUrl, this.socketGatewayUrl, this.publicGatewayUrl, this.cdnImagesUrl));
   }
 }

@@ -26,7 +26,9 @@ export class DesktopBindings implements BindingModuleInterface {
       ? { cookie: headers.cookie ?? '', 'user-agent': headers['user-agent'] ?? '' }
       : {};
 
-    new DomainBinding(url, device, config.socketGatewayUrl, sessionHeaders, publicUrl).register(registry);
+    new DomainBinding(url, device, config.socketGatewayUrl, sessionHeaders, publicUrl, config.cdnImagesUrl).register(
+      registry,
+    );
     const sessions = new SessionService(publicUrl, device);
 
     if (headers?.['x-sellgar-session']) sessions.hydrate(JSON.parse(headers['x-sellgar-session']));

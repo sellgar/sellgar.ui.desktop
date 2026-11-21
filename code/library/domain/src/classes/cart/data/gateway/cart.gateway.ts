@@ -31,9 +31,7 @@ export class CartGateway implements CartGatewayInterface {
     const cart = await this.toEntity(CartEntity, result);
 
     for (const item of cart.items) {
-      item.imageUrl = item.imageUuid
-        ? resolveGatewayUrl(`/v1/files/${item.imageUuid}`, this.config.getPublicGatewayUrl()).toString()
-        : null;
+      item.imageUrl = item.imageUuid ? this.config.getImageUrl(item.imageUuid) : null;
     }
 
     return cart;

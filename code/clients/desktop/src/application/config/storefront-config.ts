@@ -1,6 +1,7 @@
 export interface StorefrontConfig {
   readonly clientGatewayUrl: string;
   readonly socketGatewayUrl: string;
+  readonly cdnImagesUrl?: string;
 }
 
 export function parseStorefrontConfig(input: unknown): StorefrontConfig {
@@ -8,8 +9,10 @@ export function parseStorefrontConfig(input: unknown): StorefrontConfig {
 
   const config = input as Partial<StorefrontConfig>;
 
-  for (const key of ['clientGatewayUrl', 'socketGatewayUrl'] as const) {
+  for (const key of ['clientGatewayUrl', 'socketGatewayUrl', 'cdnImagesUrl'] as const) {
     const value = config[key];
+
+    if (key === 'cdnImagesUrl' && value === undefined) continue;
 
     if (typeof value !== 'string') throw new Error(`Missing storefront configuration: ${key}`);
 
@@ -20,12 +23,17 @@ export function parseStorefrontConfig(input: unknown): StorefrontConfig {
     }
   }
 
-  return { clientGatewayUrl: config.clientGatewayUrl!, socketGatewayUrl: config.socketGatewayUrl! };
+  return {
+    clientGatewayUrl: config.clientGatewayUrl!,
+    socketGatewayUrl: config.socketGatewayUrl!,
+    cdnImagesUrl: config.cdnImagesUrl,
+  };
 }
 
 export function readStorefrontConfig(): StorefrontConfig {
   return parseStorefrontConfig({
     clientGatewayUrl: process.env.PUBLIC_CLIENT_GATEWAY_URL ?? 'http://localhost:4030',
     socketGatewayUrl: process.env.PUBLIC_SOCKET_GATEWAY_URL ?? 'http://localhost:4040',
+    cdnImagesUrl: process.env.PUBLIC_CDN_IMAGES_URL || undefined,
   });
 }

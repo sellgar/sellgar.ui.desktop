@@ -4,7 +4,6 @@ import { validateOrReject } from 'class-validator';
 import { Inject, Injectable } from '@sellgar/app';
 
 import { CartEntity, ConfigInterface } from '@library/domain';
-import { resolveGatewayUrl } from '@library/domain/gateway-url';
 import { SessionContextInterface } from '@library/session';
 import { type SocketIOConnectionInterface, SocketIOConnectionsInterface } from '@library/socket-io';
 
@@ -49,9 +48,7 @@ export class CartChangesHub implements CartChangesHubInterface {
         await validateOrReject(cart);
 
         for (const item of cart.items) {
-          item.imageUrl = item.imageUuid
-            ? resolveGatewayUrl(`/v1/files/${item.imageUuid}`, this.config.getPublicGatewayUrl()).toString()
-            : null;
+          item.imageUrl = item.imageUuid ? this.config.getImageUrl(item.imageUuid) : null;
         }
 
         await changed(cart);

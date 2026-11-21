@@ -7,12 +7,14 @@ import { StorefrontConfigState } from './storefront-config.state';
 const previous = {
   client: process.env.PUBLIC_CLIENT_GATEWAY_URL,
   socket: process.env.PUBLIC_SOCKET_GATEWAY_URL,
+  cdn: process.env.PUBLIC_CDN_IMAGES_URL,
 };
 
 afterEach(() => {
   for (const [key, value] of Object.entries({
     PUBLIC_CLIENT_GATEWAY_URL: previous.client,
     PUBLIC_SOCKET_GATEWAY_URL: previous.socket,
+    PUBLIC_CDN_IMAGES_URL: previous.cdn,
   })) {
     if (value === undefined) delete process.env[key];
     else process.env[key] = value;
@@ -22,6 +24,7 @@ afterEach(() => {
 test('reads configuration at runtime and transfers only public fields through the application snapshot', () => {
   process.env.PUBLIC_CLIENT_GATEWAY_URL = 'https://first.invalid';
   process.env.PUBLIC_SOCKET_GATEWAY_URL = 'https://socket.invalid';
+  process.env.PUBLIC_CDN_IMAGES_URL = 'https://cdn.invalid/images';
   const first = readStorefrontConfig();
 
   process.env.PUBLIC_CLIENT_GATEWAY_URL = 'https://second.invalid';
@@ -33,6 +36,7 @@ test('reads configuration at runtime and transfers only public fields through th
 
   assert.deepEqual(restored, first);
   assert.equal('secret' in restored, false);
+  assert.equal(restored.cdnImagesUrl, 'https://cdn.invalid/images');
   state.hydrate(restored);
   assert.deepEqual(state.getSnapshot(), first);
 });
@@ -43,6 +47,11 @@ test('rejects missing configuration and URLs with credentials or unsafe protocol
     {},
     { clientGatewayUrl: 'file:///etc/passwd', socketGatewayUrl: 'https://socket.invalid' },
     { clientGatewayUrl: 'https://user:password@api.invalid', socketGatewayUrl: 'https://socket.invalid' },
+    {
+      clientGatewayUrl: 'https://api.invalid',
+      socketGatewayUrl: 'https://socket.invalid',
+      cdnImagesUrl: 'file:///tmp',
+    },
   ]) {
     assert.throws(() => parseStorefrontConfig(input));
   }

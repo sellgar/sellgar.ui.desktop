@@ -3,5 +3,7 @@ export abstract class ConfigInterface {
 
   abstract getPublicGatewayUrl(): string;
 
+  abstract getImageUrl(imageUuid: string, imageUrl?: string): string;
+
   abstract getSocketGatewayUrl(): string;
 }

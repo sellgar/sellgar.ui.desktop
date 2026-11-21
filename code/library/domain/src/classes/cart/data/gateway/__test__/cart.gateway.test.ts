@@ -51,13 +51,13 @@ const recordUuid = '00000000-0000-4000-8000-000000000001';
 const cartUuid = '00000000-0000-4000-8000-000000000002';
 const shopUuid = '00000000-0000-4000-8000-000000000003';
 const mutation = { cartUuid, recordUuid, cartVersion: '2', quantity: 1 };
-const createGateway = () => {
+const createGateway = (cdnImagesUrl?: string) => {
   const executor = new TestRequestExecutor();
 
   return {
     executor,
     gateway: new CartGateway(
-      new Config('https://gateway.example.test', 'https://socket.example.test'),
+      new Config('https://gateway.example.test', 'https://socket.example.test', undefined, cdnImagesUrl),
       new HttpClient({ getUniqueId: () => 'browser-device' }),
       executor,
     ),
@@ -151,6 +151,9 @@ test('cart reads validate nested data and preserve exact money strings', async (
   assert.equal(result.items[0].imageUrl, `https://gateway.example.test/v1/files/${recordUuid}`);
   assert.equal(result.items[0].price?.value, item.price.value);
   assert.equal(result.itemsTotal, item.subtotal);
+  const cdnResult = await createGateway('https://cdn.example.test/images').gateway.get();
+
+  assert.equal(cdnResult.items[0].imageUrl, `https://cdn.example.test/images/${recordUuid}`);
   mock.method(globalThis, 'fetch', async () =>
     Response.json({ ...cart, items: [{ ...item, price: { ...item.price, value: 12.34 } }] }),
   );

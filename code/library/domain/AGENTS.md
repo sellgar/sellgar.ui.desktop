@@ -11,6 +11,6 @@
 - HTTP выполняется через RequestExecutor приложения, с объединением его signal и signal loader. RequestExecutor принадлежит framework application scope; повторно регистрировать его в домене нельзя.
 - ConfigBinding получает адрес gateway от application host. HttpClient сохраняет `cache: 'no-store'` и преобразует HTTP/transport ошибки в исключения framework.
 - CartGateway владеет /v1/cart и /v1/cart/items. Публичные команды передают recordUuid, quantity и version; владелец, магазин и idempotencyKey определяются backend gateway. Ответы валидируются в CartEntity/CartItemMutationEntity, деньги сохраняются строками.
-- Изображение позиции Cart берётся из `imageUuid` проекции сервиса. CartGateway подготавливает `imageUrl` через существующий публичный `/v1/files/:uuid`; socket-адаптер делает то же перед публикацией снимка. URL сохраняется при SSR-гидратации. Карточки Offer для миниатюр не запрашиваются.
+- Изображение позиции Cart берётся из `imageUuid` проекции сервиса. CartGateway и socket-адаптер подготавливают `imageUrl` через единый Config.getImageUrl перед публикацией снимка. При заданном CDN используется его адрес; без CDN сохраняется публичный `/v1/files/:uuid`. URL сохраняется при SSR-гидратации. Карточки Offer для миниатюр не запрашиваются.
 - DeviceServiceInterface — технический порт; DomainBinding получает реализацию от host. HttpClient добавляет X-Device-Id и credentials для session-запросов. Сессия хранится только в HttpOnly cookie.
 - Заказы, изменение складских остатков и admin-only auth/CRUD находятся вне текущего контракта.

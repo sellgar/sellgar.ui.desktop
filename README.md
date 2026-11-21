@@ -45,12 +45,15 @@ node --env-file=.env server.js
 | `CLIENT_GATEWAY_URL` | адрес client gateway для серверных запросов SSR и proxy |
 | `PUBLIC_CLIENT_GATEWAY_URL` | доступный браузеру адрес client gateway |
 | `PUBLIC_SOCKET_GATEWAY_URL` | доступный браузеру адрес socket gateway |
+| `PUBLIC_CDN_IMAGES_URL` | публичный адрес изображений, например `https://cdn.dev.sellgar.ru/images` |
 
 `PUBLIC_*` — явный список публичных полей, передаваемых через существующий
 ApplicationSnapshot. Браузер восстанавливает настройки до создания bindings.
 `NEXT_PUBLIC_*` не используется для средовых настроек: Next фиксирует эти значения
 во время build. Внутренний endpoint и остальные переменные не сериализуются.
-URL изображений формируются через публичный gateway и при SSR.
+URL изображений каталога, карточки, опций и корзины формируются через
+`PUBLIC_CDN_IMAGES_URL` и при SSR, и при socket-обновлениях. Без этой переменной
+сохраняется прежнее обращение через публичный gateway для локальной разработки.
 
 Секреты не записываются в ConfigMap, Git, build args или image. Если серверу
 понадобится секрет, он должен подключаться в pod из Kubernetes Secret отдельно
@@ -64,7 +67,7 @@ Dev values задают публичный origin `https://dev.sellgar.ru`. Се
 браузер использует `/api/client` и `/socket.io` на публичном HTTPS origin.
 Ingress витрины обслуживает `/`; админка размещается на отдельном
 `https://admin.dev.sellgar.ru/`. TLS Secret `sellgar-dev-tls` содержит сертификат
-обоих имён. Prod ingress включается после настройки production-среды.
+этих имён и `cdn.dev.sellgar.ru`. Prod ingress включается после настройки production-среды.
 
 ## CI и выпуск
 

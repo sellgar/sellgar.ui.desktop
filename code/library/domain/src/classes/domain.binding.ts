@@ -13,13 +13,16 @@ export class DomainBinding extends BindingModuleInterface {
     private readonly socketGatewayUrl: string,
     private readonly sessionHeaders: Readonly<Record<string, string>> = {},
     private readonly publicGatewayUrl: string = gatewayUrl,
+    private readonly cdnImagesUrl?: string,
   ) {
     super();
   }
 
   register(registry: BindingRegistryInterface): void {
     registry.bind(DeviceServiceInterface).toConstantValue(this.device);
-    new ConfigBinding(this.gatewayUrl, this.socketGatewayUrl, this.publicGatewayUrl).register(registry);
+    new ConfigBinding(this.gatewayUrl, this.socketGatewayUrl, this.publicGatewayUrl, this.cdnImagesUrl).register(
+      registry,
+    );
     new HttpClientBinding(this.sessionHeaders).register(registry);
     new StoreBinding().register(registry);
     new CartBinding().register(registry);
