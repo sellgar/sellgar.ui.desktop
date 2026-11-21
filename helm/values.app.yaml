@@ -1,5 +1,7 @@
 image:
   repository: ghcr.io/sellgar/sellgar.ui.desktop
+imagePullSecrets:
+- name: ghcr-pull
 env: {}
 applicationPort: 8080
 podSecurityContext:
