@@ -1,41 +1,27 @@
 image:
-  repository: ghcr.io/pyatakovvg/sellgar.ui.desktop
-
+  repository: ghcr.io/sellgar/sellgar.ui.desktop
 env: {}
-
 applicationPort: 8080
-
 podSecurityContext:
   runAsUser: 1000
   runAsGroup: 1000
   fsGroup: 1000
-
 volumeMounts:
-  - mountPath: /tmp
-    name: temporary-files
-  - mountPath: /app/clients/desktop/.next/cache
-    name: next-cache
-  - mountPath: /app/clients/desktop/.env
-    name: environment
-    subPath: .env
-    readOnly: true
-
+- mountPath: /tmp
+  name: temporary-files
+- mountPath: /app/clients/desktop/.next/cache
+  name: next-cache
 volumes:
-  - name: temporary-files
-    emptyDir:
-      sizeLimit: 64Mi
-  - name: next-cache
-    emptyDir:
-      sizeLimit: 256Mi
-  - name: environment
-    configMap:
-      name: storefront-env
-
+- name: temporary-files
+  emptyDir:
+    sizeLimit: 64Mi
+- name: next-cache
+  emptyDir:
+    sizeLimit: 256Mi
 ingress:
   enabled: true
   className: traefik
   path: /
-
 probes:
   startup:
     httpGet:
@@ -53,7 +39,6 @@ probes:
       path: /healthz
       port: http
     periodSeconds: 10
-
 resources:
   requests:
     cpu: 100m
@@ -61,3 +46,7 @@ resources:
   limits:
     cpu: '1'
     memory: 1Gi
+environmentFile:
+  enabled: true
+  filename: .env
+  mountPath: /app/clients/desktop/.env

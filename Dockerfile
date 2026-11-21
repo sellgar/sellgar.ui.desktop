@@ -1,16 +1,20 @@
 # syntax=docker/dockerfile:1
-FROM node:24-bookworm-slim@sha256:dc26ae92c9fb15cf6b1d63e20f0944b2efe0f115b20e00be48fb23fceb061c54 AS builder
+FROM node:24-bookworm-slim@sha256:dc26ae92c9fb15cf6b1d63e20f0944b2efe0f115b20e00be48fb23fceb061c54 AS dependencies
 
 WORKDIR /app/code
 
-RUN corepack enable
-
 COPY code/ ./
 
-RUN yarn install --immutable
-RUN yarn build:desktop_ui
+RUN node .yarn/releases/yarn-4.18.0.cjs install --immutable
 
-FROM node:24-bookworm-slim@sha256:dc26ae92c9fb15cf6b1d63e20f0944b2efe0f115b20e00be48fb23fceb061c54 AS runtime
+FROM dependencies AS builder
+RUN node .yarn/releases/yarn-4.18.0.cjs build:desktop_ui
+
+FROM dependencies AS tests
+RUN node .yarn/releases/yarn-4.18.0.cjs test:storefront
+
+FROM node:24-bookworm-slim@sha256:dc26ae92c9fb15cf6b1d63e20f0944b2efe0f115b20e00be48fb23fceb061c54 AS application
+LABEL io.sellgar.image-role=application
 
 ENV NODE_ENV=production \
     NEXT_TELEMETRY_DISABLED=1 \
