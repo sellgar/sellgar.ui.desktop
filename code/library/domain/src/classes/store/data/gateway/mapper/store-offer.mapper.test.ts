@@ -73,6 +73,7 @@ test('разрешает изображения варианта и опций �
         description: null,
         kind: 'OPTIONS',
         unitCode: null,
+        unit: null,
         options: [
           {
             code: 'blue',

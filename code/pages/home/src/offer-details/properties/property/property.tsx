@@ -49,7 +49,12 @@ export const Property: React.FC<IProps> = (props) => {
                 .join(', ') || 'Не указано'}
             </span>
           )}
-          {props.field.property.unitCode ? <span className={s.unit}>{props.field.property.unitCode}</span> : null}
+          {props.field.property.unit ? (
+            <span className={s.unit}>
+              {'\u00a0'}
+              {props.field.property.unit.symbol}
+            </span>
+          ) : null}
         </dd>
       </Typography>
     </div>

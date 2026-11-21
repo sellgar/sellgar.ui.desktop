@@ -3,6 +3,7 @@ import { IsArray, IsEnum, IsString, ValidateIf, ValidateNested } from 'class-val
 
 import { Entity } from '@sellgar/app';
 
+import { UnitEntity } from '../../unit/index.ts';
 import { PropertyKind } from './property-kind.enum.ts';
 import { PropertyOptionEntity } from './property-option.entity.ts';
 
@@ -29,6 +30,12 @@ export class PropertyEntity {
   @ValidateIf((_object, value) => value !== null)
   @IsString()
   unitCode: string | null;
+
+  @Expose()
+  @ValidateIf((_object, value) => value !== null)
+  @ValidateNested()
+  @Type(() => UnitEntity)
+  unit: UnitEntity | null;
 
   @Expose()
   @IsArray()
