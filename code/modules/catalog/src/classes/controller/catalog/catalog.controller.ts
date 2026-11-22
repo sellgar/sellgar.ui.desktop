@@ -1,8 +1,6 @@
 import { instanceToPlain, plainToInstance } from 'class-transformer';
 import { validateOrReject } from 'class-validator';
-
 import { Controller, Inject } from '@sellgar/app';
-
 import { StoreServiceInterface } from '@library/domain';
 
 import { CatalogControllerInterface } from './catalog-controller.interface.ts';
@@ -23,7 +21,7 @@ export class CatalogController implements CatalogControllerInterface {
     try {
       const result = await this.storeService.getAll(query.brandCode, query.categoryUuid, args.signal);
 
-      return this.toResult({ products: result.data, failedToLoad: false, brandFiltered, categoryFiltered });
+      return this.toResult({ products: result.items, failedToLoad: false, brandFiltered, categoryFiltered });
     } catch (error) {
       if (args.signal?.aborted) throw error;
 

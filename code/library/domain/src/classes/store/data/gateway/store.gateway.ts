@@ -1,10 +1,9 @@
 import { type ClassConstructor, plainToInstance } from 'class-transformer';
 import { validateOrReject } from 'class-validator';
-
 import { Inject, Injectable, RequestExecutorInterface } from '@sellgar/app';
-
 import { resolveGatewayUrl } from '@library/domain/gateway-url';
 
+import { StoreQueryDto } from './dto/store-query.dto.ts';
 import { ConfigInterface } from '../../../../infrastructure/config/config.interface.ts';
 import { HttpClientInterface } from '../../../../infrastructure/http-client/http-client.interface.ts';
 import { StoreOfferEntity } from '../../domain/store-offer.entity.ts';
@@ -25,24 +24,32 @@ export class StoreGateway implements StoreGatewayInterface {
     brandCode?: string | string[],
     categoryUuid?: string | string[],
     signal?: AbortSignal,
+    limit?: number,
+    nextToken?: string,
   ): Promise<StoreOfferResultEntity> {
+    const dto = plainToInstance(StoreQueryDto, { brandCode, categoryUuid, limit, nextToken });
+    await validateOrReject(dto);
     const url = resolveGatewayUrl('/v1/products', this.config.getGatewayUrl());
 
-    if (brandCode !== undefined) {
-      for (const code of Array.isArray(brandCode) ? brandCode : [brandCode]) url.searchParams.append('brandCode', code);
+    if (dto.brandCode !== undefined) {
+      for (const code of Array.isArray(dto.brandCode) ? dto.brandCode : [dto.brandCode])
+        url.searchParams.append('brandCode', code);
     }
 
-    if (categoryUuid !== undefined) {
-      for (const uuid of Array.isArray(categoryUuid) ? categoryUuid : [categoryUuid])
+    if (dto.categoryUuid !== undefined) {
+      for (const uuid of Array.isArray(dto.categoryUuid) ? dto.categoryUuid : [dto.categoryUuid])
         url.searchParams.append('categoryUuid', uuid);
     }
+
+    if (dto.limit !== undefined) url.searchParams.set('limit', String(dto.limit));
+    if (dto.nextToken !== undefined) url.searchParams.set('nextToken', dto.nextToken);
 
     const result = await this.requestExecutor.run({ scope: 'store-offers:list' }, (request) =>
       this.httpClient.get(url, signal ? AbortSignal.any([signal, request.signal]) : request.signal),
     );
     const entity = await this.toEntity(StoreOfferResultEntity, result);
 
-    entity.data = await Promise.all(entity.data.map((offer) => this.toOffer(offer)));
+    entity.items = await Promise.all(entity.items.map((offer) => this.toOffer(offer)));
 
     return entity;
   }

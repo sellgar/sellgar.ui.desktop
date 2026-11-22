@@ -13,8 +13,10 @@ export class StoreService implements StoreServiceInterface {
     brandCode?: string | string[],
     categoryUuid?: string | string[],
     signal?: AbortSignal,
+    limit?: number,
+    nextToken?: string,
   ): Promise<StoreOfferResultEntity> {
-    return this.storeGateway.getAll(brandCode, categoryUuid, signal);
+    return this.storeGateway.getAll(brandCode, categoryUuid, signal, limit, nextToken);
   }
 
   findOfferByUuid(uuid: string, signal?: AbortSignal): Promise<StoreOfferDetailsEntity> {

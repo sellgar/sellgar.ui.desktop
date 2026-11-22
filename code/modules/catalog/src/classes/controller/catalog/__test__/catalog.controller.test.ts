@@ -2,7 +2,6 @@ import 'reflect-metadata';
 
 import assert from 'node:assert/strict';
 import { afterEach, mock, test } from 'node:test';
-
 import type { StoreServiceInterface } from '@library/domain';
 
 import {
@@ -20,7 +19,7 @@ test('catalog controller forwards its input to the service and serializes nested
     getAll: async (...args) => {
       received = args;
 
-      return { data: [offer], meta: { totalRows: 1 } };
+      return { items: [offer], meta: { limit: 50, nextToken: null } };
     },
     findOfferByUuid: async (...args) => {
       received = args;
@@ -72,7 +71,7 @@ test('catalog validates brand codes from the URL and forwards them without filte
     getAll: async (...args) => {
       received = args;
 
-      return { data: [], meta: { totalRows: 0 } };
+      return { items: [], meta: { limit: 50, nextToken: null } };
     },
     findOfferByUuid: async () => {
       throw new Error('Unused');
@@ -99,7 +98,7 @@ test('catalog validates category UUIDs and passes combined filters to the servic
     getAll: async (...args) => {
       received = args;
 
-      return { data: [], meta: { totalRows: 0 } };
+      return { items: [], meta: { limit: 50, nextToken: null } };
     },
     findOfferByUuid: async () => {
       throw new Error('Unused');

@@ -6,6 +6,8 @@ export abstract class StoreGatewayInterface {
     brandCode?: string | string[],
     categoryUuid?: string | string[],
     signal?: AbortSignal,
+    limit?: number,
+    nextToken?: string,
   ): Promise<StoreOfferResultEntity>;
 
   abstract findOfferByUuid(uuid: string, signal?: AbortSignal): Promise<StoreOfferDetailsEntity>;

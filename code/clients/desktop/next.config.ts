@@ -16,6 +16,9 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'dev.sellgar.ru', pathname: '/api/client/v1/files/*', search: '' },
       { protocol: 'https', hostname: 'cdn.dev.sellgar.ru', pathname: '/images/*', search: '' },
       { protocol: 'https', hostname: 'cdn.sellgar.ru', pathname: '/images/*', search: '' },
+      ...(process.env.NODE_ENV === 'development'
+        ? [{ protocol: 'http' as const, hostname: 'localhost', port: '8088', pathname: '/images/*', search: '' }]
+        : []),
     ],
     // Dev DNS resolves this gateway to the private address of our K3s VM.
     dangerouslyAllowLocalIP: true,

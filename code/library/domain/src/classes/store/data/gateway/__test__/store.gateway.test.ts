@@ -2,9 +2,7 @@ import 'reflect-metadata';
 
 import assert from 'node:assert/strict';
 import { afterEach, mock, test } from 'node:test';
-
 import { instanceToPlain } from 'class-transformer';
-
 import {
   type RequestExecutionOptions,
   RequestExecutorInterface,
@@ -66,21 +64,21 @@ afterEach(() => mock.restoreAll());
 test('catalog returns validated domain entities and preserves identity, metadata and money strings', async () => {
   const offer = instanceToPlain(createStoreOffer());
 
-  mock.method(globalThis, 'fetch', async () => Response.json({ data: [offer], meta: { totalRows: 13 } }));
+  mock.method(globalThis, 'fetch', async () => Response.json({ items: [offer], meta: { limit: 50, nextToken: null } }));
   const { gateway, executor } = createGateway();
   const result = await gateway.getAll();
 
   assert.ok(result instanceof StoreOfferResultEntity);
-  assert.ok(result.data[0] instanceof StoreOfferEntity);
-  assert.equal(result.data[0].uuid, offerUuid);
-  assert.equal(result.data[0].product.uuid, offer.productUuid);
-  assert.equal(result.data[0].records[0].inventory.version, 2);
+  assert.ok(result.items[0] instanceof StoreOfferEntity);
+  assert.equal(result.items[0].uuid, offerUuid);
+  assert.equal(result.items[0].product.uuid, offer.productUuid);
+  assert.equal(result.items[0].records[0].inventory.version, 2);
   assert.deepEqual(
-    result.data[0].records.map((record) => record.order),
+    result.items[0].records.map((record) => record.order),
     [0, 1],
   );
-  assert.equal(result.data[0].records[0].currentPrice?.value, '1500.00');
-  assert.equal(result.meta.totalRows, 13);
+  assert.equal(result.items[0].records[0].currentPrice?.value, '1500.00');
+  assert.deepEqual(instanceToPlain(result.meta), { limit: 50, nextToken: null });
   assert.deepEqual(executor.scopes, ['store-offers:list']);
   assert.equal('failedToLoad' in result, false);
 });
@@ -88,14 +86,16 @@ test('gateway rejects invalid UUIDs and nested records before they reach the ser
   const { gateway } = createGateway();
   const offer = instanceToPlain(createStoreOffer());
 
-  mock.method(globalThis, 'fetch', async () => Response.json({ data: [{ ...offer, uuid: 'bad-uuid' }], meta: {} }));
+  mock.method(globalThis, 'fetch', async () =>
+    Response.json({ items: [{ ...offer, uuid: 'bad-uuid' }], meta: { limit: 50, nextToken: null } }),
+  );
   await assert.rejects(gateway.getAll());
   mock.method(globalThis, 'fetch', async () =>
     Response.json({
-      data: [
+      items: [
         { ...offer, records: [{ ...offer.records[0], inventory: { ...offer.records[0].inventory, available: '12' } }] },
       ],
-      meta: {},
+      meta: { limit: 50, nextToken: null },
     }),
   );
   await assert.rejects(gateway.getAll());
@@ -108,7 +108,7 @@ test('catalog forwards both cancellation sources through RequestExecutor and byp
   mock.method(globalThis, 'fetch', async (...args: unknown[]) => {
     requested = args;
 
-    return Response.json({ data: [], meta: {} });
+    return Response.json({ items: [], meta: { limit: 50, nextToken: null } });
   });
   await gateway.getAll(undefined, undefined, loader.signal);
   const init = requested[1] as RequestInit;
@@ -134,7 +134,7 @@ test('catalog serializes brand codes as repeated URL parameters without changing
   mock.method(globalThis, 'fetch', async (url: URL) => {
     requested = url;
 
-    return Response.json({ data: [], meta: {} });
+    return Response.json({ items: [], meta: { limit: 50, nextToken: null } });
   });
   await gateway.getAll(['brand & company', 'бренд/один']);
   assert.deepEqual(requested.searchParams.getAll('brandCode'), ['brand & company', 'бренд/один']);
@@ -147,7 +147,7 @@ test('catalog serializes one or several categories together with brands', async 
   mock.method(globalThis, 'fetch', async (url: URL) => {
     requested = url;
 
-    return Response.json({ data: [], meta: {} });
+    return Response.json({ items: [], meta: { limit: 50, nextToken: null } });
   });
   for (const categoryUuid of [categories[0].categoryUuid, categories.map((path) => path.categoryUuid)]) {
     await gateway.getAll(['apple', 'samsung'], categoryUuid);
@@ -215,7 +215,7 @@ test('SSR requests use the internal gateway while image URLs use the public gate
   mock.method(globalThis, 'fetch', async (url: URL) => {
     assert.equal(url.origin, 'http://gateway.internal');
 
-    return Response.json({ data: [offer], meta: {} });
+    return Response.json({ items: [offer], meta: { limit: 50, nextToken: null } });
   });
   const gateway = new StoreGateway(
     new Config('http://gateway.internal', 'https://socket.public.test', 'https://gateway.public.test'),
@@ -224,5 +224,19 @@ test('SSR requests use the internal gateway while image URLs use the public gate
   );
   const result = await gateway.getAll();
 
-  assert.equal(result.data[0].variant.images[0].imageUrl, 'https://gateway.public.test/v1/files/image');
+  assert.equal(result.items[0].variant.images[0].imageUrl, 'https://gateway.public.test/v1/files/image');
+});
+
+test('catalog carries the opaque continuation and rejects invalid page size before HTTP', async () => {
+  let requested: URL | undefined;
+  mock.method(globalThis, 'fetch', async (url) => {
+    requested = new URL(String(url));
+    return Response.json({ items: [], meta: { limit: 2, nextToken: 'next.cursor' } });
+  });
+  const { gateway } = createGateway();
+  const page = await gateway.getAll(undefined, undefined, undefined, 2, 'previous.cursor');
+  assert.equal(requested!.searchParams.get('limit'), '2');
+  assert.equal(requested!.searchParams.get('nextToken'), 'previous.cursor');
+  assert.equal(page.meta.nextToken, 'next.cursor');
+  await assert.rejects(gateway.getAll(undefined, undefined, undefined, 101));
 });
