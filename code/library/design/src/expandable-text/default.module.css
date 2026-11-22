@@ -1,0 +1,23 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--numbers-8);
+  min-width: 0;
+}
+
+.content {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 5;
+  overflow: hidden;
+}
+
+.content[data-open='true'] {
+  display: block;
+  -webkit-line-clamp: unset;
+}
+
+.control {
+  display: flex;
+  align-items: flex-start;
+}

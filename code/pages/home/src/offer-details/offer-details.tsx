@@ -3,7 +3,9 @@
 import React from 'react';
 
 import { Card, Typography } from '@sellgar/kit';
+import { BankCardLineIcon, TruckLineIcon } from '@sellgar/kit/icons';
 
+import { ExpandableText } from '@library/design';
 import type { CategoryPathEntity, StoreOfferEntity } from '@library/domain';
 
 import { Brand } from './brand';
@@ -22,6 +24,8 @@ interface IProps {
 }
 
 export const OfferDetailsComponent: React.FC<IProps> = (props) => {
+  const [expandedDescriptionUuid, setExpandedDescriptionUuid] = React.useState<string | null>(null);
+
   if (props.failedToLoad || !props.offer) {
     return (
       <div className={s.page}>
@@ -45,6 +49,7 @@ export const OfferDetailsComponent: React.FC<IProps> = (props) => {
   }
 
   const offer = props.offer;
+  const hasDescription = Boolean(offer.product.description || offer.variant.description);
   const hasProperties = offer.product.properties.length > 0 || offer.variant.properties.length > 0;
 
   return (
@@ -57,38 +62,69 @@ export const OfferDetailsComponent: React.FC<IProps> = (props) => {
       </header>
       <Card>
         <div className={s.overview}>
-          {offer.brand ? (
-            <div className={s.brand}>
-              <Brand name={offer.brand.name} imageUrl={offer.brand.images[0]?.imageUrl} />
-            </div>
-          ) : null}
           <Gallery key={offer.uuid} images={offer.variant.images} name={offer.product.name} />
           <div className={s.info}>
-            {props.purchase}
-            {offer.product.description || offer.variant.description ? (
-              <section className={s.description} aria-label="Описание товара">
-                <Typography size="body-s" weight="regular">
-                  {offer.product.description ? <p className={s.paragraph}>{offer.product.description}</p> : null}
-                  {offer.variant.description && offer.variant.description !== offer.product.description ? (
-                    <p className={s.paragraph}>{offer.variant.description}</p>
-                  ) : null}
+            <div className={s.summary}>
+              <div className={s.selection}>
+                <Typography size="body-s" weight="semi-bold">
+                  <p className={s.title}>{offer.variant.name}</p>
                 </Typography>
-              </section>
-            ) : null}
+              </div>
+              {offer.brand ? <Brand name={offer.brand.name} imageUrl={offer.brand.images[0]?.imageUrl} /> : null}
+            </div>
+            {props.purchase}
+            <section className={s.conditions} aria-label="Доставка и оплата">
+              <div className={s.condition}>
+                <span className={s.icon} aria-hidden={true}>
+                  <TruckLineIcon />
+                </span>
+                <Typography size="caption-l" weight="regular">
+                  <p className={s.paragraph}>Срок и стоимость доставки — при оформлении</p>
+                </Typography>
+              </div>
+              <div className={s.condition}>
+                <span className={s.icon} aria-hidden={true}>
+                  <BankCardLineIcon />
+                </span>
+                <Typography size="caption-l" weight="regular">
+                  <p className={s.paragraph}>Выбор способа оплаты — при оформлении</p>
+                </Typography>
+              </div>
+            </section>
           </div>
         </div>
       </Card>
-      {hasProperties ? (
+      {props.siblingOffers.length > 0 ? <Variants offers={props.siblingOffers} /> : null}
+      {hasDescription || hasProperties ? (
         <Card>
-          <section className={s.attributes} aria-label="Атрибуты товара">
+          <section className={s.details} aria-label="О товаре">
             <Typography size="body-s" weight="semi-bold">
-              <h2 className={s.title}>Характеристики</h2>
+              <h2 className={s.title}>О товаре</h2>
             </Typography>
-            <Properties productFields={offer.product.properties} variantFields={offer.variant.properties} />
+            {hasDescription ? (
+              <section className={s.description} aria-label="Описание товара">
+                <ExpandableText
+                  key={offer.uuid}
+                  open={expandedDescriptionUuid === offer.uuid}
+                  onOpen={(open) => setExpandedDescriptionUuid(open ? offer.uuid : null)}
+                >
+                  <Typography size="caption-l" weight="regular">
+                    {offer.product.description ? <p className={s.paragraph}>{offer.product.description}</p> : null}
+                    {offer.variant.description && offer.variant.description !== offer.product.description ? (
+                      <p className={s.paragraph}>{offer.variant.description}</p>
+                    ) : null}
+                  </Typography>
+                </ExpandableText>
+              </section>
+            ) : null}
+            {hasProperties ? (
+              <section className={s.attributes} aria-label="Характеристики">
+                <Properties productFields={offer.product.properties} variantFields={offer.variant.properties} />
+              </section>
+            ) : null}
           </section>
         </Card>
       ) : null}
-      {props.siblingOffers.length > 0 ? <Variants offers={props.siblingOffers} /> : null}
     </div>
   );
 };

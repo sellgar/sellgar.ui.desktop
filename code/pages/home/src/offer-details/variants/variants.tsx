@@ -13,7 +13,7 @@ interface IProps {
 
 export const Variants: React.FC<IProps> = (props) => {
   return (
-    <nav className={s.wrapper} aria-label="Связанные предложения">
+    <nav id="related-offers" className={s.wrapper} aria-label="Связанные предложения" tabIndex={-1}>
       <Typography size="body-s" weight="semi-bold">
         <h2 className={s.title}>Смотрите также</h2>
       </Typography>
