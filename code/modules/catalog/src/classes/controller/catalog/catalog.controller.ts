@@ -18,17 +18,18 @@ export class CatalogController implements CatalogControllerInterface {
 
     await validateOrReject(query);
     const brandFiltered = query.brandCode !== undefined;
+    const categoryFiltered = query.categoryUuid !== undefined;
 
     try {
-      const result = await this.storeService.getAll(query.brandCode, args.signal);
+      const result = await this.storeService.getAll(query.brandCode, query.categoryUuid, args.signal);
 
-      return this.toResult({ products: result.data, failedToLoad: false, brandFiltered });
+      return this.toResult({ products: result.data, failedToLoad: false, brandFiltered, categoryFiltered });
     } catch (error) {
       if (args.signal?.aborted) throw error;
 
       console.error('Unable to load storefront catalog', error);
 
-      return this.toResult({ products: [], failedToLoad: true, brandFiltered });
+      return this.toResult({ products: [], failedToLoad: true, brandFiltered, categoryFiltered });
     }
   }
 

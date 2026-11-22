@@ -21,11 +21,20 @@ export class StoreGateway implements StoreGatewayInterface {
     @Inject(RequestExecutorInterface) private readonly requestExecutor: RequestExecutorInterface,
   ) {}
 
-  async getAll(brandCode?: string | string[], signal?: AbortSignal): Promise<StoreOfferResultEntity> {
+  async getAll(
+    brandCode?: string | string[],
+    categoryUuid?: string | string[],
+    signal?: AbortSignal,
+  ): Promise<StoreOfferResultEntity> {
     const url = resolveGatewayUrl('/v1/products', this.config.getGatewayUrl());
 
     if (brandCode !== undefined) {
       for (const code of Array.isArray(brandCode) ? brandCode : [brandCode]) url.searchParams.append('brandCode', code);
+    }
+
+    if (categoryUuid !== undefined) {
+      for (const uuid of Array.isArray(categoryUuid) ? categoryUuid : [categoryUuid])
+        url.searchParams.append('categoryUuid', uuid);
     }
 
     const result = await this.requestExecutor.run({ scope: 'store-offers:list' }, (request) =>

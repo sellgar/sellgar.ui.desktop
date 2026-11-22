@@ -19,7 +19,14 @@ export const Categories: React.FC<IProps> = (props) => {
           <Breadcrumb
             key={path.categoryUuid}
             wrap={true}
-            items={[{ label: 'Каталог', href: '/' }, ...path.items.map((item) => ({ label: item.name }))]}
+            items={[
+              { label: 'Каталог', href: '/' },
+              ...path.items.map((item) => ({
+                label: item.name,
+                href: `/?${new URLSearchParams({ categoryUuid: item.uuid })}`,
+              })),
+              { label: props.name },
+            ]}
           />
         ))
       ) : (

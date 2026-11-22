@@ -110,7 +110,7 @@ test('catalog forwards both cancellation sources through RequestExecutor and byp
 
     return Response.json({ data: [], meta: {} });
   });
-  await gateway.getAll(undefined, loader.signal);
+  await gateway.getAll(undefined, undefined, loader.signal);
   const init = requested[1] as RequestInit;
 
   assert.equal(String(requested[0]), 'https://gateway.example.test/v1/products');
@@ -121,7 +121,7 @@ test('catalog forwards both cancellation sources through RequestExecutor and byp
   assert.equal(signal.aborted, true);
   const secondLoader = new AbortController();
 
-  await gateway.getAll(undefined, secondLoader.signal);
+  await gateway.getAll(undefined, undefined, secondLoader.signal);
   const secondSignal = (requested[1] as RequestInit).signal!;
 
   executor.abort.abort();
@@ -139,6 +139,25 @@ test('catalog serializes brand codes as repeated URL parameters without changing
   await gateway.getAll(['brand & company', 'бренд/один']);
   assert.deepEqual(requested.searchParams.getAll('brandCode'), ['brand & company', 'бренд/один']);
   assert.equal(requested.pathname, '/v1/products');
+});
+test('catalog serializes one or several categories together with brands', async () => {
+  const { gateway } = createGateway();
+  let requested = new URL('https://example.test');
+
+  mock.method(globalThis, 'fetch', async (url: URL) => {
+    requested = url;
+
+    return Response.json({ data: [], meta: {} });
+  });
+  for (const categoryUuid of [categories[0].categoryUuid, categories.map((path) => path.categoryUuid)]) {
+    await gateway.getAll(['apple', 'samsung'], categoryUuid);
+    assert.deepEqual(
+      requested.searchParams.getAll('categoryUuid'),
+      Array.isArray(categoryUuid) ? categoryUuid : [categoryUuid],
+    );
+    assert.deepEqual(requested.searchParams.getAll('brandCode'), ['apple', 'samsung']);
+    assert.equal(requested.pathname, '/v1/products');
+  }
 });
 test('offer lookup encodes the identifier and propagates HTTP 404 instead of inventing an empty entity', async () => {
   const { gateway, executor } = createGateway();

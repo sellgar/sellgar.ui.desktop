@@ -4,9 +4,9 @@
 - Catalog product/variant/property, brand и currency имеют собственных владельцев. Store владеет предложениями, учетными записями, ценами и остатками.
 - Product/variant/brand/property здесь — публичные проекции client gateway. Не добавлять отсутствующие admin-only поля и команды.
 - Нынешний публичный HTTP API возвращает каталог предложений через `/v1/products` и карточку через `/v1/offers/:uuid`. Эти чтения принадлежат StoreGateway; отдельные CRUD gateways без endpoints не создавать.
-- StoreService.getAll принимает необязательный brandCode (строку/массив) и AbortSignal.
-  StoreGateway передаёт код через URLSearchParams; массив — повторением параметра.
-  SQL-фильтрация принадлежит Store, локальный отбор предложений по бренду запрещён.
+- StoreService.getAll принимает необязательные brandCode и categoryUuid (строку/массив) и AbortSignal.
+  StoreGateway передаёт фильтры через URLSearchParams; массив — повторением параметра.
+  SQL-фильтрация и обход потомков категории принадлежат Store, локальный отбор предложений запрещён.
 - Stable Entity/Service экспортировать через фасад предметного среза и `src/index.ts`. Другой срез использует только публичный фасад.
 - Gateway/DTO/Mapper и slice bindings не экспортировать. Подключать пакет через `DomainBinding`.
 - Использовать framework `@Entity`/`@EntityCollection` для стабильных идентификаторов и коллекций. UUID, даты, деньги и вложенные ответы валидировать перед возвратом.

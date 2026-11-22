@@ -1,7 +1,12 @@
 import { Expose } from 'class-transformer';
-import { IsString, MaxLength, MinLength, ValidateIf } from 'class-validator';
+import { IsString, IsUUID, MaxLength, MinLength, ValidateIf } from 'class-validator';
 
 export class CatalogQueryDto {
+  @Expose()
+  @ValidateIf((_object, value) => value !== undefined)
+  @IsUUID(undefined, { each: true })
+  categoryUuid?: string | string[];
+
   @Expose()
   @ValidateIf((_object, value) => value !== undefined)
   @IsString({ each: true })

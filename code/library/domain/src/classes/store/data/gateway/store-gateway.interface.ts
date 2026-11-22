@@ -2,7 +2,11 @@ import type { StoreOfferDetailsEntity } from '../../domain/store-offer-details.e
 import type { StoreOfferResultEntity } from '../../domain/store-offer-result.entity.ts';
 
 export abstract class StoreGatewayInterface {
-  abstract getAll(brandCode?: string | string[], signal?: AbortSignal): Promise<StoreOfferResultEntity>;
+  abstract getAll(
+    brandCode?: string | string[],
+    categoryUuid?: string | string[],
+    signal?: AbortSignal,
+  ): Promise<StoreOfferResultEntity>;
 
   abstract findOfferByUuid(uuid: string, signal?: AbortSignal): Promise<StoreOfferDetailsEntity>;
 }

@@ -15,9 +15,17 @@ interface IProps {
   products: StoreOfferEntity[];
   failedToLoad?: boolean;
   brandFiltered?: boolean;
+  categoryFiltered?: boolean;
 }
 
 export const HomeComponent: React.FC<IProps> = (props) => {
+  const filtered = props.brandFiltered || props.categoryFiltered;
+  const filterDescription = props.categoryFiltered
+    ? props.brandFiltered
+      ? 'Товары выбранной категории и бренда.'
+      : 'Товары выбранной категории.'
+    : 'Товары выбранного бренда.';
+
   return (
     <div className={s.page}>
       <section className={s.summary}>
@@ -27,9 +35,9 @@ export const HomeComponent: React.FC<IProps> = (props) => {
           </Typography>
           <Typography size="body-s" weight="regular">
             <p>
-              {props.brandFiltered ? (
+              {filtered ? (
                 <>
-                  Товары выбранного бренда.{' '}
+                  {filterDescription}{' '}
                   <Link href="/" className={s.link}>
                     Все товары
                   </Link>
@@ -46,19 +54,15 @@ export const HomeComponent: React.FC<IProps> = (props) => {
         <section className={s.status}>
           <Typography size="h6" weight="semi-bold">
             <h2>
-              {props.failedToLoad
-                ? 'Не удалось загрузить товары'
-                : props.brandFiltered
-                  ? 'Товары не найдены'
-                  : 'Товаров пока нет'}
+              {props.failedToLoad ? 'Не удалось загрузить товары' : filtered ? 'Товары не найдены' : 'Товаров пока нет'}
             </h2>
           </Typography>
           <Typography size="body-s" weight="regular">
             <p>
               {props.failedToLoad
                 ? 'Попробуйте обновить страницу позже'
-                : props.brandFiltered
-                  ? 'У выбранного бренда пока нет доступных товаров'
+                : filtered
+                  ? 'По выбранным условиям пока нет доступных товаров'
                   : 'На витрине нет активных позиций'}
             </p>
           </Typography>
