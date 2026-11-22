@@ -42,14 +42,6 @@
   min-width: 0;
 }
 
-.variants {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--numbers-8);
-  min-width: 0;
-}
-
 .description {
   display: flex;
   flex-direction: column;

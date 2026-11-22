@@ -11,7 +11,7 @@ import { Categories } from './categories';
 import s from './default.module.css';
 import { Gallery } from './gallery';
 import { Properties } from './properties';
-import { Variant } from './variant';
+import { Variants } from './variants';
 
 interface IProps {
   offer?: StoreOfferEntity | null;
@@ -64,13 +64,6 @@ export const OfferDetailsComponent: React.FC<IProps> = (props) => {
           ) : null}
           <Gallery key={offer.uuid} images={offer.variant.images} name={offer.product.name} />
           <div className={s.info}>
-            {props.siblingOffers.length > 1 ? (
-              <nav className={s.variants} aria-label="Варианты товара">
-                {props.siblingOffers.map((item) => (
-                  <Variant key={item.uuid} offer={item} active={item.uuid === offer.uuid} />
-                ))}
-              </nav>
-            ) : null}
             {props.purchase}
             {offer.product.description || offer.variant.description ? (
               <section className={s.description} aria-label="Описание товара">
@@ -95,6 +88,7 @@ export const OfferDetailsComponent: React.FC<IProps> = (props) => {
           </section>
         </Card>
       ) : null}
+      {props.siblingOffers.length > 0 ? <Variants offers={props.siblingOffers} /> : null}
     </div>
   );
 };

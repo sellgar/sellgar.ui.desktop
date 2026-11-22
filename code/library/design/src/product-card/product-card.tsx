@@ -1,3 +1,4 @@
+import cn from 'classnames';
 import React from 'react';
 
 import { Link } from '@sellgar/app/next';
@@ -14,44 +15,60 @@ interface IProps {
   imageUrl?: string;
   imagePlaceholder: string;
   price: string;
+  size?: 'default' | 'compact';
 }
 
 export const ProductCard: React.FC<IProps> = (props) => {
   const linkLabel = [props.name, props.brandName, props.variantName].filter(Boolean).join(' · ');
+  const isCompact = props.size === 'compact';
+  const wrapperClassName = cn(s.wrapper, {
+    [s['size--compact']]: isCompact,
+  });
+  const TitleTag = isCompact ? 'h3' : 'h2';
+  const price = (
+    <Typography size={isCompact ? 'caption-l' : 'body-s'} weight="semi-bold">
+      <div>{props.price}</div>
+    </Typography>
+  );
+
+  const preview = props.imageUrl ? (
+    <div className={s.image}>
+      <Image src={props.imageUrl} sizes={isCompact ? '80px' : '192px'} alt="" aria-hidden={true} />
+    </div>
+  ) : (
+    <Typography size="body-l" weight="medium">
+      <span aria-hidden={true}>{props.imagePlaceholder}</span>
+    </Typography>
+  );
 
   return (
-    <article className={s.wrapper}>
-      <Link className={s.preview} href={props.href} aria-label={linkLabel}>
-        {props.imageUrl ? (
-          <div className={s.image}>
-            <Image src={props.imageUrl} sizes="192px" alt="" aria-hidden={true} />
-          </div>
-        ) : (
-          <Typography size="body-l" weight="medium">
-            <span aria-hidden={true}>{props.imagePlaceholder}</span>
-          </Typography>
-        )}
-      </Link>
+    <Link className={wrapperClassName} href={props.href} aria-label={linkLabel}>
+      <div className={s.preview}>{preview}</div>
       <div className={s.body}>
         {props.brandName ? (
           <Typography size="caption-m" weight="regular">
             <div className={s.brand}>{props.brandName}</div>
           </Typography>
         ) : null}
-        <Typography size="body-s" weight="semi-bold">
-          <div>{props.price}</div>
-        </Typography>
+        {!isCompact ? price : null}
         <Typography size="caption-m" weight="regular">
-          <h2 className={s.title}>
-            <Link className={s.name} href={props.href} aria-label={linkLabel}>
+          <TitleTag className={s.title}>
+            <span className={s.name} title={isCompact ? props.name : undefined}>
               {props.name}
-            </Link>
-          </h2>
+            </span>
+          </TitleTag>
         </Typography>
-        <div className={s.personalizations}>
-          <Badge label={props.variantName} size="sm" color="blue" />
-        </div>
+        {isCompact ? (
+          <Typography size="caption-m" weight="regular">
+            <div className={s.variant}>{props.variantName}</div>
+          </Typography>
+        ) : (
+          <div className={s.personalizations}>
+            <Badge label={props.variantName} size="sm" color="blue" />
+          </div>
+        )}
+        {isCompact ? price : null}
       </div>
-    </article>
+    </Link>
   );
 };
