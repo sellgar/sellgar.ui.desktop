@@ -11,6 +11,24 @@
   color: var(--text-base-secondary);
 }
 
+.link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--numbers-20);
+  color: var(--text-base-primary);
+  text-decoration: none;
+  border-radius: var(--measurements-radius-xs);
+}
+
+.link:hover {
+  color: var(--text-base-secondary);
+}
+
+.link:focus-visible {
+  outline: var(--numbers-2) solid var(--border-action-focus);
+  outline-offset: var(--numbers-2);
+}
+
 .label,
 .name {
   text-box: trim-both cap alphabetic;

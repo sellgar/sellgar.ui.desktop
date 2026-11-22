@@ -70,7 +70,13 @@ export const OfferDetailsComponent: React.FC<IProps> = (props) => {
                   <p className={s.title}>{offer.variant.name}</p>
                 </Typography>
               </div>
-              {offer.brand ? <Brand name={offer.brand.name} imageUrl={offer.brand.images[0]?.imageUrl} /> : null}
+              {offer.brand ? (
+                <Brand
+                  name={offer.brand.name}
+                  imageUrl={offer.brand.images[0]?.imageUrl}
+                  href={`/?${new URLSearchParams({ brandCode: offer.brand.code })}`}
+                />
+              ) : null}
             </div>
             {props.purchase}
             <section className={s.conditions} aria-label="Доставка и оплата">

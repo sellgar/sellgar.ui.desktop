@@ -29,13 +29,13 @@ test('catalog controller forwards its input to the service and serializes nested
     },
   };
   const controller = new CatalogController(service);
-  const result = await controller.loader({ signal: abort.signal });
+  const result = await controller.loader({ signal: abort.signal, props: { searchParams: {} } });
 
   assert.equal(result.products[0].uuid, offerUuid);
   assert.equal(result.failedToLoad, false);
   assert.equal(Object.getPrototypeOf(result.products[0]), Object.prototype);
   assert.equal(Object.getPrototypeOf(result.products[0].records[0].inventory), Object.prototype);
-  assert.deepEqual(received, [abort.signal]);
+  assert.deepEqual(received, [undefined, abort.signal]);
 });
 test('catalog controller owns the UI failure state and propagates cancellation', async () => {
   const abort = new AbortController();
@@ -51,10 +51,43 @@ test('catalog controller owns the UI failure state and propagates cancellation',
   mock.method(console, 'error', () => {});
   const controller = new CatalogController(service);
 
-  assert.deepEqual(await controller.loader({ signal: abort.signal }), { products: [], failedToLoad: true });
+  assert.deepEqual(await controller.loader({ signal: abort.signal, props: { searchParams: {} } }), {
+    products: [],
+    failedToLoad: true,
+    brandFiltered: false,
+  });
   abort.abort();
   mock.method(service, 'getAll', async () => {
     throw abort.signal.reason;
   });
-  await assert.rejects(controller.loader({ signal: abort.signal }), { name: 'AbortError' });
+  await assert.rejects(controller.loader({ signal: abort.signal, props: { searchParams: {} } }), {
+    name: 'AbortError',
+  });
+});
+
+test('catalog validates brand codes from the URL and forwards them without filtering offers in UI', async () => {
+  let received: unknown[] = [];
+  const service: StoreServiceInterface = {
+    getAll: async (...args) => {
+      received = args;
+
+      return { data: [], meta: { totalRows: 0 } };
+    },
+    findOfferByUuid: async () => {
+      throw new Error('Unused');
+    },
+  };
+  const controller = new CatalogController(service);
+  const signal = new AbortController().signal;
+
+  for (const brandCode of ['samsung', ['apple', 'samsung']]) {
+    const result = await controller.loader({ signal, props: { searchParams: { brandCode } } });
+
+    assert.deepEqual(received, [brandCode, signal]);
+    assert.equal(result.brandFiltered, true);
+    assert.equal(result.failedToLoad, false);
+  }
+  for (const brandCode of ['', null, ['apple', ''], { code: 'apple' }]) {
+    await assert.rejects(controller.loader({ signal, props: { searchParams: { brandCode } } }));
+  }
 });

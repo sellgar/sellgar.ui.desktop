@@ -46,7 +46,7 @@ export const ExpandableText: React.FC<IProps> = (props) => {
             size="sm"
             aria-controls={contentId}
             aria-expanded={props.open}
-            tailIcon={props.open ? <ArrowUpSLineIcon /> : <ArrowDownSLineIcon />}
+            leadIcon={props.open ? <ArrowUpSLineIcon /> : <ArrowDownSLineIcon />}
             onClick={() => props.onOpen(!props.open)}
           >
             {props.open ? 'Свернуть' : 'Читать полностью'}

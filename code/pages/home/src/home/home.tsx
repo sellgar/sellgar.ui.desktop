@@ -2,6 +2,7 @@
 
 import React from 'react';
 
+import { Link } from '@sellgar/app/next';
 import { Badge, Typography } from '@sellgar/kit';
 
 import { ProductCard } from '@library/design';
@@ -13,6 +14,7 @@ import s from './default.module.css';
 interface IProps {
   products: StoreOfferEntity[];
   failedToLoad?: boolean;
+  brandFiltered?: boolean;
 }
 
 export const HomeComponent: React.FC<IProps> = (props) => {
@@ -24,7 +26,18 @@ export const HomeComponent: React.FC<IProps> = (props) => {
             <h1>Каталог товаров</h1>
           </Typography>
           <Typography size="body-s" weight="regular">
-            <p>Доступные позиции магазина</p>
+            <p>
+              {props.brandFiltered ? (
+                <>
+                  Товары выбранного бренда.{' '}
+                  <Link href="/" className={s.link}>
+                    Все товары
+                  </Link>
+                </>
+              ) : (
+                'Доступные позиции магазина'
+              )}
+            </p>
           </Typography>
         </div>
         <Badge label={props.products.length} color="gray" />
@@ -32,10 +45,22 @@ export const HomeComponent: React.FC<IProps> = (props) => {
       {props.failedToLoad || props.products.length === 0 ? (
         <section className={s.status}>
           <Typography size="h6" weight="semi-bold">
-            <h2>{props.failedToLoad ? 'Не удалось загрузить товары' : 'Товаров пока нет'}</h2>
+            <h2>
+              {props.failedToLoad
+                ? 'Не удалось загрузить товары'
+                : props.brandFiltered
+                  ? 'Товары не найдены'
+                  : 'Товаров пока нет'}
+            </h2>
           </Typography>
           <Typography size="body-s" weight="regular">
-            <p>{props.failedToLoad ? 'Попробуйте обновить страницу позже' : 'На витрине нет активных позиций'}</p>
+            <p>
+              {props.failedToLoad
+                ? 'Попробуйте обновить страницу позже'
+                : props.brandFiltered
+                  ? 'У выбранного бренда пока нет доступных товаров'
+                  : 'На витрине нет активных позиций'}
+            </p>
           </Typography>
         </section>
       ) : (

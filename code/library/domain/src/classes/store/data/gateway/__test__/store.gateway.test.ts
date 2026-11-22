@@ -110,7 +110,7 @@ test('catalog forwards both cancellation sources through RequestExecutor and byp
 
     return Response.json({ data: [], meta: {} });
   });
-  await gateway.getAll(loader.signal);
+  await gateway.getAll(undefined, loader.signal);
   const init = requested[1] as RequestInit;
 
   assert.equal(String(requested[0]), 'https://gateway.example.test/v1/products');
@@ -121,11 +121,24 @@ test('catalog forwards both cancellation sources through RequestExecutor and byp
   assert.equal(signal.aborted, true);
   const secondLoader = new AbortController();
 
-  await gateway.getAll(secondLoader.signal);
+  await gateway.getAll(undefined, secondLoader.signal);
   const secondSignal = (requested[1] as RequestInit).signal!;
 
   executor.abort.abort();
   assert.equal(secondSignal.aborted, true);
+});
+test('catalog serializes brand codes as repeated URL parameters without changing codes', async () => {
+  const { gateway } = createGateway();
+  let requested = new URL('https://example.test');
+
+  mock.method(globalThis, 'fetch', async (url: URL) => {
+    requested = url;
+
+    return Response.json({ data: [], meta: {} });
+  });
+  await gateway.getAll(['brand & company', 'бренд/один']);
+  assert.deepEqual(requested.searchParams.getAll('brandCode'), ['brand & company', 'бренд/один']);
+  assert.equal(requested.pathname, '/v1/products');
 });
 test('offer lookup encodes the identifier and propagates HTTP 404 instead of inventing an empty entity', async () => {
   const { gateway, executor } = createGateway();

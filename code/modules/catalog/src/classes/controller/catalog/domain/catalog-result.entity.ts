@@ -13,4 +13,8 @@ export class CatalogResultEntity {
   @Expose()
   @IsBoolean()
   failedToLoad: boolean;
+
+  @Expose()
+  @IsBoolean()
+  brandFiltered: boolean;
 }

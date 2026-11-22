@@ -9,8 +9,8 @@ import { StoreServiceInterface } from './store-service.interface.ts';
 export class StoreService implements StoreServiceInterface {
   constructor(@Inject(StoreGatewayInterface) private readonly storeGateway: StoreGatewayInterface) {}
 
-  getAll(signal?: AbortSignal): Promise<StoreOfferResultEntity> {
-    return this.storeGateway.getAll(signal);
+  getAll(brandCode?: string | string[], signal?: AbortSignal): Promise<StoreOfferResultEntity> {
+    return this.storeGateway.getAll(brandCode, signal);
   }
 
   findOfferByUuid(uuid: string, signal?: AbortSignal): Promise<StoreOfferDetailsEntity> {
