@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Image, Typography } from '@sellgar/kit';
+import { ButtonLink, Image, Typography } from '@sellgar/kit';
 
 import s from './default.module.css';
 
@@ -11,11 +11,20 @@ interface IProps {
 
 export const Brand: React.FC<IProps> = (props) => {
   return (
-    <Typography size="body-s" weight="medium">
-      <div className={s.wrapper}>
-        <span>{props.name}</span>
-        {props.imageUrl ? <Image src={props.imageUrl} className={s.image} aria-hidden={true} /> : null}
-      </div>
-    </Typography>
+    <div className={s.wrapper}>
+      <Typography size="caption-l" weight="regular">
+        <span className={s.label}>Ещё от</span>
+      </Typography>
+      <ButtonLink
+        type="button"
+        size="sm"
+        aria-label={`Все товары бренда ${props.name}`}
+        aria-disabled={true}
+        leadIconSizing="content"
+        leadIcon={props.imageUrl ? <Image src={props.imageUrl} className={s.image} aria-hidden={true} /> : undefined}
+      >
+        {props.imageUrl ? null : <span className={s.name}>{props.name}</span>}
+      </ButtonLink>
+    </div>
   );
 };

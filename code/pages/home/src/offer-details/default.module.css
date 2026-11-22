@@ -26,7 +26,12 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   align-items: start;
-  gap: var(--numbers-32);
+  gap: var(--numbers-16) var(--numbers-32);
+  min-width: 0;
+}
+
+.brand {
+  grid-column: 1 / -1;
   min-width: 0;
 }
 

@@ -1,13 +1,25 @@
 .wrapper {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--numbers-16);
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: var(--numbers-8);
   min-width: 0;
+}
+
+.label {
   color: var(--text-base-secondary);
 }
 
+.label,
+.name {
+  text-box: trim-both cap alphabetic;
+}
+
 .image {
+  flex: none;
   width: auto;
   height: var(--numbers-14);
+  max-width: var(--numbers-64);
+  object-fit: contain;
 }

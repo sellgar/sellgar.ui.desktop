@@ -57,9 +57,13 @@ export const OfferDetailsComponent: React.FC<IProps> = (props) => {
       </header>
       <Card>
         <div className={s.overview}>
+          {offer.brand ? (
+            <div className={s.brand}>
+              <Brand name={offer.brand.name} imageUrl={offer.brand.images[0]?.imageUrl} />
+            </div>
+          ) : null}
           <Gallery key={offer.uuid} images={offer.variant.images} name={offer.product.name} />
           <div className={s.info}>
-            {offer.brand ? <Brand name={offer.brand.name} imageUrl={offer.brand.images[0]?.imageUrl} /> : null}
             {props.siblingOffers.length > 1 ? (
               <nav className={s.variants} aria-label="Варианты товара">
                 {props.siblingOffers.map((item) => (
