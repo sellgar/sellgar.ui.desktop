@@ -2,7 +2,7 @@
 target: Аудит общей композиции страницы телефона
 total_score: 26
 max_score: 40
-na_heuristics: 
+na_heuristics:
 p0_count: 0
 p1_count: 2
 target_identity: "file:/home/sellgar/projects/my/sellgar.workspace/frontend/sellgar.ui.desktop/code/pages/home/src/offer-details/offer-details.tsx"
