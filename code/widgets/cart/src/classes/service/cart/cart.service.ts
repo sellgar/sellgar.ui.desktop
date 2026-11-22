@@ -62,7 +62,16 @@ export class CartWidgetService extends CartWidgetServiceInterface {
     } catch (error) {
       if (signal.aborted) throw error;
 
-      const failure = this.describeFailure(error);
+      if (isHttpException(error) && error.status === 409) {
+        try {
+          await this.readCart(signal);
+        } catch (refreshError) {
+          if (signal.aborted) throw refreshError;
+          // readCart records the load failure; retain the original command error.
+        }
+      }
+
+      const failure = this.describeFailure(error, recordUuid);
 
       this.state.finish(failure);
       this.notifications.show({
@@ -83,7 +92,7 @@ export class CartWidgetService extends CartWidgetServiceInterface {
     }
   }
 
-  private describeFailure(error: unknown): Error {
+  private describeFailure(error: unknown, recordUuid: string): Error {
     if (error instanceof DOMException && error.name === 'TimeoutError') {
       return new Error(
         'Изменение сохранено, но обновление корзины задерживается. Дождитесь восстановления соединения.',
@@ -92,7 +101,9 @@ export class CartWidgetService extends CartWidgetServiceInterface {
     }
 
     if (isHttpException(error) && error.status === 409) {
-      return new Error('Количество изменилось или товар недоступен. Обновите страницу и попробуйте снова.', {
+      const message = this.state.getSnapshot().cart?.items.find((item) => item.recordUuid === recordUuid)?.message;
+
+      return new Error(message ?? 'Количество изменилось или товар недоступен. Попробуйте снова.', {
         cause: error,
       });
     }

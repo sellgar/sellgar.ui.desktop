@@ -233,6 +233,40 @@ test('explains conflicts and session expiry without leaking technical failures',
   );
 });
 
+test('refreshes an archived row after a conflict without waiting for socket delivery', async () => {
+  const state = new CartStore();
+  const messages: NotificationPayload[] = [];
+  const original = createItem(recordUuid, 2, '5');
+
+  state.load(createCart([original], '5'));
+  const unavailable = Object.assign(createItem(recordUuid, 2, '5'), {
+    message: 'Товар больше не продаётся',
+    canCheckout: false,
+    canIncrease: false,
+  });
+  let reads = 0;
+  const service: CartServiceInterface = {
+    ...createService(),
+    get: async () => {
+      reads++;
+
+      return Object.assign(createCart([unavailable], '5'), { itemsTotal: '0.00' });
+    },
+    setItemQuantity: async () => {
+      throw new HttpException('conflict', 409);
+    },
+  };
+  const controller = new CartWidgetService(service, state, createNotifications(messages));
+
+  await assert.rejects(controller.setQuantity(recordUuid, 3), /Товар больше не продаётся/);
+  assert.equal(reads, 1);
+  assert.equal(state.getSnapshot().cart?.items[0].quantity, 2);
+  assert.equal(state.getSnapshot().cart?.items[0].canCheckout, false);
+  assert.equal(state.getSnapshot().cart?.itemsTotal, '0.00');
+  assert.equal(state.getSnapshot().busy, false);
+  assert.equal(messages.length, 1);
+});
+
 test('failed cart reads keep quantities unknown rather than presenting an empty cart', async () => {
   const state = new CartStore();
   const service: CartServiceInterface = {
