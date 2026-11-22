@@ -3,18 +3,9 @@
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: var(--numbers-12);
-  padding: var(--numbers-12);
+  padding: var(--numbers-8) var(--numbers-12);
   border-radius: var(--measurements-radius-lg);
   background: var(--background-surface-neutral);
-  min-width: 0;
-}
-
-.single {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: var(--numbers-12);
   min-width: 0;
 }
 
@@ -59,16 +50,19 @@
 
 .purchase {
   display: flex;
+  grid-column: 1 / -1;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
   flex-wrap: wrap;
   gap: var(--numbers-12);
   min-width: 0;
 }
-.single .purchase {
-  flex: 1;
-  justify-content: space-between;
+
+.details + .purchase {
+  grid-column: auto;
+  justify-content: flex-end;
 }
+
 .price {
   margin: 0;
   color: var(--text-base-primary);

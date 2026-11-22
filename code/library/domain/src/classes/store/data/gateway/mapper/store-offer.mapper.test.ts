@@ -54,6 +54,35 @@ test('работает с единственной записью без уто�
   assert.deepEqual(mapper.toOffer(source).records, []);
 });
 
+test('разрешает CDN-ссылки бренда в сохранённом порядке без изменения исходного ответа', () => {
+  const source = createOffer();
+  const secondImageUuid = '00000000-0000-4000-8000-000000000011';
+
+  source.brand!.images = [
+    { imageUuid: secondImageUuid, sortOrder: 1 },
+    { imageUuid, sortOrder: 0 },
+  ];
+  const before = instanceToPlain(source);
+  const result = StoreOfferMapper.toOffer(
+    source,
+    new Config('http://gateway.internal', 'https://socket.test', 'https://gateway.test', 'https://cdn.test/images'),
+  );
+
+  assert.deepEqual(
+    result.brand?.images.map((image) => image.imageUrl),
+    [`https://cdn.test/images/${imageUuid}`, `https://cdn.test/images/${secondImageUuid}`],
+  );
+  assert.deepEqual(instanceToPlain(source), before);
+});
+
+test('сохраняет бренд без изображений и отсутствие бренда', () => {
+  const source = createOffer();
+
+  assert.deepEqual(mapper.toOffer(source).brand?.images, []);
+  source.brand = null;
+  assert.equal(mapper.toOffer(source).brand, null);
+});
+
 test('разрешает изображения варианта и опций и сохраняет типизированные значения', () => {
   const source = createOffer();
 

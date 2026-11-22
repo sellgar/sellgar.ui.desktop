@@ -18,29 +18,33 @@ export const Property: React.FC<IProps> = (props) => {
   return (
     <div className={s.wrapper}>
       <Typography size="caption-m" weight="regular">
-        <dt className={s.label}>
-          <span className={s.name}>{props.field.property.name}</span>
-        </dt>
+        <div className={s.label}>{props.field.property.name}</div>
       </Typography>
+      <div className={s.leader} aria-hidden="true" />
       <Typography size="caption-m" weight="semi-bold">
-        <dd className={s.values}>
+        <div className={s.values}>
           {props.field.values.length === 0 ? (
             <span>Не указано</span>
           ) : props.field.property.kind === 'OPTIONS' ? (
-            props.field.values
-              .filter((value) => value.valueOptionCode !== null)
-              .map((value) => {
-                const option = options.find((item) => item.code === value.valueOptionCode);
+            <span>
+              {props.field.values
+                .filter((value) => value.valueOptionCode !== null)
+                .map((value, index) => {
+                  const option = options.find((item) => item.code === value.valueOptionCode);
 
-                return (
-                  <span key={value.valueOptionCode} className={s.option}>
-                    {option?.extras.map((extra) => (
-                      <ExtraFactory key={`${extra.type}:${extra.sortOrder}`} extra={extra} />
-                    ))}
-                    <span>{option?.name ?? 'Значение недоступно'}</span>
-                  </span>
-                );
-              })
+                  return (
+                    <React.Fragment key={value.valueOptionCode}>
+                      {index > 0 ? ', ' : null}
+                      <span className={s.option}>
+                        {option?.extras.map((extra) => (
+                          <ExtraFactory key={`${extra.type}:${extra.sortOrder}`} extra={extra} />
+                        ))}
+                        <span>{option?.name ?? 'Значение недоступно'}</span>
+                      </span>
+                    </React.Fragment>
+                  );
+                })}
+            </span>
           ) : (
             <span>
               {props.field.values
@@ -55,7 +59,7 @@ export const Property: React.FC<IProps> = (props) => {
               {props.field.property.unit.symbol}
             </span>
           ) : null}
-        </dd>
+        </div>
       </Typography>
     </div>
   );

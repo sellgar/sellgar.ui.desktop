@@ -6,6 +6,14 @@ export class StoreOfferMapper {
   static toOffer(offer: StoreOfferEntity, config: Pick<ConfigInterface, 'getImageUrl'>): StoreOfferEntity {
     return {
       ...offer,
+      brand: offer.brand
+        ? {
+            ...offer.brand,
+            images: [...offer.brand.images]
+              .sort((left, right) => left.sortOrder - right.sortOrder)
+              .map((image) => ({ ...image, imageUrl: config.getImageUrl(image.imageUuid) })),
+          }
+        : null,
       product: { ...offer.product, properties: this.toFields(offer.product.properties, config) },
       variant: {
         ...offer.variant,

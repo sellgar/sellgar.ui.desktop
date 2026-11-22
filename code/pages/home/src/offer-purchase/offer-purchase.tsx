@@ -29,7 +29,6 @@ export const OfferPurchase: React.FC<IProps> = (props) => {
           <Record
             key={record.uuid}
             record={record}
-            single={props.records.length === 1}
             item={props.items?.find((item) => item.recordUuid === record.uuid)}
             loaded={props.items !== undefined}
             busy={props.busy}

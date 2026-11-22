@@ -1,38 +1,29 @@
 .wrapper {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(min-content, max-content) minmax(var(--numbers-64), 1fr) minmax(0, max-content);
   align-items: baseline;
-  gap: var(--numbers-12);
+  column-gap: var(--numbers-8);
   margin-bottom: var(--numbers-12);
   break-inside: avoid;
 }
-.label {
-  display: flex;
-  flex: 1 1 auto;
-  align-items: baseline;
-  gap: var(--numbers-8);
-  min-width: 0;
-  color: var(--text-base-secondary);
-}
-.label::after {
-  content: '';
-  flex: 1;
-  min-width: var(--numbers-12);
+.leader {
+  grid-column: 2;
+  grid-row: 1;
   border-bottom: var(--numbers-1) dotted var(--border-base-neutral-subtle);
 }
-.name {
-  min-width: 0;
-  overflow-wrap: anywhere;
+.label {
+  grid-column: 1;
+  grid-row: 1;
+  min-width: min-content;
+  color: var(--text-base-secondary);
+  overflow-wrap: normal;
 }
 .values {
-  display: flex;
-  flex: 0 1 auto;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: var(--numbers-8);
-  margin: 0;
+  grid-column: 3;
+  grid-row: 1;
   min-width: 0;
   overflow-wrap: anywhere;
-  text-align: right;
+  text-align: justify;
 }
 .option {
   display: inline-flex;

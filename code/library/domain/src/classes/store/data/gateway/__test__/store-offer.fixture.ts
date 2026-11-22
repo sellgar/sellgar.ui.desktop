@@ -16,7 +16,7 @@ export const createStoreOffer = (): StoreOfferEntity =>
     productUuid,
     variantUuid,
     product: { uuid: productUuid, name: 'Майка', description: null, properties: [] },
-    brand: { code: 'brand', name: 'Бренд', description: null },
+    brand: { code: 'brand', name: 'Бренд', description: null, images: [] },
     variant: { uuid: variantUuid, name: 'Синяя', description: null, properties: [], images: [] },
     records: [
       {

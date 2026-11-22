@@ -6,6 +6,7 @@ import { Card, Typography } from '@sellgar/kit';
 
 import type { CategoryPathEntity, StoreOfferEntity } from '@library/domain';
 
+import { Brand } from './brand';
 import { Categories } from './categories';
 import s from './default.module.css';
 import { Gallery } from './gallery';
@@ -58,11 +59,7 @@ export const OfferDetailsComponent: React.FC<IProps> = (props) => {
         <div className={s.overview}>
           <Gallery key={offer.uuid} images={offer.variant.images} name={offer.product.name} />
           <div className={s.info}>
-            {offer.brand ? (
-              <Typography size="body-s" weight="medium">
-                <p className={s.brand}>{offer.brand.name}</p>
-              </Typography>
-            ) : null}
+            {offer.brand ? <Brand name={offer.brand.name} imageUrl={offer.brand.images[0]?.imageUrl} /> : null}
             {props.siblingOffers.length > 1 ? (
               <nav className={s.variants} aria-label="Варианты товара">
                 {props.siblingOffers.map((item) => (
@@ -90,12 +87,7 @@ export const OfferDetailsComponent: React.FC<IProps> = (props) => {
             <Typography size="body-s" weight="semi-bold">
               <h2 className={s.title}>Характеристики</h2>
             </Typography>
-            {offer.product.properties.length > 0 ? (
-              <Properties title="Товар" fields={offer.product.properties} />
-            ) : null}
-            {offer.variant.properties.length > 0 ? (
-              <Properties title="Вариант" fields={offer.variant.properties} />
-            ) : null}
+            <Properties productFields={offer.product.properties} variantFields={offer.variant.properties} />
           </section>
         </Card>
       ) : null}

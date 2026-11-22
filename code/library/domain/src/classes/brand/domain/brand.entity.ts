@@ -1,7 +1,9 @@
-import { Expose } from 'class-transformer';
-import { IsString, ValidateIf } from 'class-validator';
+import { Expose, Type } from 'class-transformer';
+import { IsArray, IsString, ValidateIf, ValidateNested } from 'class-validator';
 
 import { Entity } from '@sellgar/app';
+
+import { BrandImageEntity } from './brand-image.entity.ts';
 
 @Entity({ identity: 'code' })
 export class BrandEntity {
@@ -17,4 +19,10 @@ export class BrandEntity {
   @ValidateIf((_object, value) => value !== null)
   @IsString()
   description: string | null;
+
+  @Expose()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => BrandImageEntity)
+  images: BrandImageEntity[];
 }

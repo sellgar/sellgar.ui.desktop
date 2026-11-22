@@ -1,28 +1,24 @@
 import React from 'react';
 
-import { Typography } from '@sellgar/kit';
-
 import type { ProductFieldEntity } from '@library/domain';
 
 import s from './default.module.css';
 import { Property } from './property';
 
 interface IProps {
-  title: string;
-  fields: ProductFieldEntity[];
+  productFields: ProductFieldEntity[];
+  variantFields: ProductFieldEntity[];
 }
 
 export const Properties: React.FC<IProps> = (props) => {
   return (
-    <section className={s.wrapper}>
-      <Typography size="caption-l" weight="medium">
-        <h3 className={s.title}>{props.title}</h3>
-      </Typography>
-      <dl className={s.fields}>
-        {props.fields.map((field) => (
-          <Property key={field.propertyCode} field={field} />
-        ))}
-      </dl>
-    </section>
+    <div className={s.fields}>
+      {props.productFields.map((field) => (
+        <Property key={`product:${field.propertyCode}`} field={field} />
+      ))}
+      {props.variantFields.map((field) => (
+        <Property key={`variant:${field.propertyCode}`} field={field} />
+      ))}
+    </div>
   );
 };

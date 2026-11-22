@@ -3,7 +3,7 @@
 import React from 'react';
 
 import { Button, QuantityStepper, ToolTip, Typography } from '@sellgar/kit';
-import { InformationLineIcon } from '@sellgar/kit/icons';
+import { InformationLineIcon, ShoppingCart2LineIcon } from '@sellgar/kit/icons';
 
 import type { CartItemEntity, StoreAccountingRecordEntity } from '@library/domain';
 
@@ -14,7 +14,6 @@ interface IProps {
   record: StoreAccountingRecordEntity;
   item?: CartItemEntity;
   loaded: boolean;
-  single?: boolean;
   busy?: boolean;
   disabled?: boolean;
   loading?: boolean;
@@ -29,7 +28,6 @@ export const Record: React.FC<IProps> = (props) => {
   const focusAfterChange = React.useRef(false);
   const clarifications = getClarifications(props.record).join(' · ');
   const name = clarifications || props.record.article;
-  const label = clarifications || (props.single ? null : 'Без уточнений');
   const quantity = props.item?.quantity ?? 0;
   const canIncrease =
     props.loaded &&
@@ -52,11 +50,11 @@ export const Record: React.FC<IProps> = (props) => {
   }, [quantity]);
 
   return (
-    <div className={props.single ? s.single : s.wrapper} role="group" aria-label={name}>
-      {label ? (
+    <div className={s.wrapper} role="group" aria-label={name}>
+      {clarifications ? (
         <div className={s.details}>
           <Typography size="caption-l" weight="medium">
-            <p className={s.name}>{label}</p>
+            <p className={s.name}>{clarifications}</p>
           </Typography>
         </div>
       ) : null}
@@ -87,7 +85,7 @@ export const Record: React.FC<IProps> = (props) => {
               }}
             >
               <QuantityStepper
-                size={props.single ? 'sm' : 'xs'}
+                size="xs"
                 outline={true}
                 value={quantity}
                 loadingAction={props.loading ? (props.pendingAction === 'decrease' ? 'left' : 'right') : undefined}
@@ -103,21 +101,21 @@ export const Record: React.FC<IProps> = (props) => {
               />
             </div>
           ) : (
-            <Button
+            <Button.Icon
               ref={buttonRef}
-              size={props.single ? 'sm' : 'xs'}
+              size="sm"
               type="button"
+              leadIcon={<ShoppingCart2LineIcon />}
               disabled={!canIncrease}
               inProcess={props.loading}
               aria-disabled={!canIncrease || props.busy}
               aria-busy={props.loading}
               aria-label={`${name}. Добавить в корзину`}
+              title="Добавить в корзину"
               onClick={() => {
                 if (canIncrease) change(1);
               }}
-            >
-              В корзину
-            </Button>
+            />
           )}
           <ToolTip placement="top" size="sm">
             <ToolTip.Trigger>
