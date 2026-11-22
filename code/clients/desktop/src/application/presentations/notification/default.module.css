@@ -1,0 +1,5 @@
+.wrapper {
+  width: calc(100vw - var(--numbers-32));
+  max-width: var(--numbers-440);
+  overflow-wrap: anywhere;
+}

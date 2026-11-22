@@ -1,4 +1,4 @@
-import { Inject, Injectable, isHttpException } from '@sellgar/app';
+import { Inject, Injectable, isHttpException, NotificationServiceInterface } from '@sellgar/app';
 
 import { type CartItemMutationEntity, CartServiceInterface } from '@library/domain';
 
@@ -12,6 +12,7 @@ export class CartWidgetService extends CartWidgetServiceInterface {
   constructor(
     @Inject(CartServiceInterface) private readonly carts: CartServiceInterface,
     @Inject(CartStore) private readonly state: CartStore,
+    @Inject(NotificationServiceInterface) private readonly notifications: NotificationServiceInterface,
   ) {
     super();
   }
@@ -64,6 +65,13 @@ export class CartWidgetService extends CartWidgetServiceInterface {
       const failure = this.describeFailure(error);
 
       this.state.finish(failure);
+      this.notifications.show({
+        status: 'destructive',
+        placement: 'top-center',
+        autoClose: true,
+        title: 'Не удалось обновить корзину',
+        description: failure.message,
+      });
       throw failure;
     } finally {
       if (

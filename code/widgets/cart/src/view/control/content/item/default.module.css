@@ -94,14 +94,6 @@
   }
 }
 
-.error {
-  grid-column: 2;
-  margin: 0;
-  font-size: var(--typography-size-caption-l);
-  line-height: var(--typography-line-height-caption-l);
-  color: var(--text-accent-red);
-}
-
 .quantity {
   display: flex;
   align-items: center;

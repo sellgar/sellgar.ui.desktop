@@ -1,13 +1,26 @@
-.wrapper,
-.options {
+.wrapper {
   display: flex;
   flex-direction: column;
   gap: var(--numbers-12);
   min-width: 0;
+  container-type: inline-size;
 }
 
 .options {
-  gap: var(--numbers-12);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) max-content;
+  column-gap: var(--numbers-24);
+  min-width: 0;
+}
+
+.clarified {
+  grid-template-columns: minmax(0, 1fr) max-content max-content;
+}
+
+@container (max-width: 360px) {
+  .clarified {
+    grid-template-columns: minmax(0, 1fr) max-content;
+  }
 }
 
 .hint {

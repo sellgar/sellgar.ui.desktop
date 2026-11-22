@@ -17,14 +17,15 @@ interface IProps {
   busy?: boolean;
   disabled?: boolean;
   activeRecordUuid?: string | null;
-  error?: string;
   failedToLoad?: boolean;
 }
 
 export const OfferPurchase: React.FC<IProps> = (props) => {
+  const hasClarifications = props.records.some((record) => record.clarifications.length > 0);
+
   return (
     <section className={s.wrapper} aria-label="Добавление товара в корзину">
-      <div className={s.options}>
+      <div className={`${s.options} ${hasClarifications ? s.clarified : ''}`}>
         {props.records.map((record) => (
           <Record
             key={record.uuid}
@@ -35,7 +36,6 @@ export const OfferPurchase: React.FC<IProps> = (props) => {
             disabled={props.disabled}
             pendingAction={props.pendingAction}
             loading={props.busy === true && props.activeRecordUuid === record.uuid}
-            error={props.activeRecordUuid === record.uuid ? props.error : undefined}
             onChange={props.onChange}
           />
         ))}

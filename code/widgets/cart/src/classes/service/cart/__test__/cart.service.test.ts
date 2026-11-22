@@ -3,12 +3,20 @@ import 'reflect-metadata';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { HttpException } from '@sellgar/app';
+import { HttpException, type NotificationPayload, type NotificationServiceInterface } from '@sellgar/app';
 
 import { CartEntity, CartItemEntity, type CartServiceInterface } from '@library/domain';
 
 import { CartStore } from '../../../store/cart/cart.store.ts';
 import { CartWidgetService } from '../cart.service.ts';
+
+const createNotifications = (messages: NotificationPayload[] = []): NotificationServiceInterface => ({
+  show: (message) => {
+    messages.push(message);
+
+    return { id: String(messages.length), close: () => undefined };
+  },
+});
 
 const recordUuid = '00000000-0000-4000-8000-000000000001';
 const otherRecordUuid = '00000000-0000-4000-8000-000000000002';
@@ -62,7 +70,7 @@ test('loads once and applies socket snapshots for subsequent commands, including
       return mutation(quantity, version);
     },
   };
-  const controller = new CartWidgetService(service, state);
+  const controller = new CartWidgetService(service, state, createNotifications());
 
   await controller.loadCart(abort.signal);
   assert.equal(state.getSnapshot().loaded, true);
@@ -105,7 +113,7 @@ test('adds a missing record and removes it when the requested quantity reaches z
       return mutation(undefined, '8');
     },
   };
-  const controller = new CartWidgetService(service, state);
+  const controller = new CartWidgetService(service, state, createNotifications());
 
   await controller.loadCart(abort.signal);
   await controller.setQuantity(recordUuid, 1, abort.signal);
@@ -127,7 +135,7 @@ test('waits for socket confirmation without issuing a read and cancels the wait 
     },
     addItem: async () => mutation(1),
   };
-  const controller = new CartWidgetService(service, state);
+  const controller = new CartWidgetService(service, state, createNotifications());
   const signal = new AbortController().signal;
 
   await controller.loadCart(signal);
@@ -157,6 +165,7 @@ test('waits for socket confirmation without issuing a read and cancels the wait 
 });
 
 test('failed or cancelled mutations preserve confirmed quantities and do not publish late responses', async () => {
+  const messages: NotificationPayload[] = [];
   const state = new CartStore();
   const abort = new AbortController();
   const service: CartServiceInterface = {
@@ -166,7 +175,7 @@ test('failed or cancelled mutations preserve confirmed quantities and do not pub
       throw new Error('unavailable');
     },
   };
-  const controller = new CartWidgetService(service, state);
+  const controller = new CartWidgetService(service, state, createNotifications(messages));
   const args = { payload: { recordUuid, quantity: 3 }, signal: abort.signal };
 
   await controller.loadCart(abort.signal);
@@ -175,6 +184,14 @@ test('failed or cancelled mutations preserve confirmed quantities and do not pub
   assert.equal(controller.getSnapshot().busy, false);
   assert.match(controller.getSnapshot().error?.message ?? '', /Не удалось изменить/);
   assert.equal(controller.getSnapshot().activeRecordUuid, recordUuid);
+  assert.equal(messages.length, 1);
+  assert.deepEqual(messages[0], {
+    status: 'destructive',
+    placement: 'top-center',
+    autoClose: true,
+    title: 'Не удалось обновить корзину',
+    description: controller.getSnapshot().error?.message,
+  });
   service.setItemQuantity = async () => {
     abort.abort();
 
@@ -184,6 +201,7 @@ test('failed or cancelled mutations preserve confirmed quantities and do not pub
     name: 'AbortError',
   });
   assert.equal(state.getSnapshot().cart?.items[0]?.quantity, 2);
+  assert.equal(messages.length, 1);
 });
 
 test('explains conflicts and session expiry without leaking technical failures', async () => {
@@ -195,7 +213,7 @@ test('explains conflicts and session expiry without leaking technical failures',
       throw failure;
     },
   };
-  const controller = new CartWidgetService(service, state);
+  const controller = new CartWidgetService(service, state, createNotifications());
   const args = { payload: { recordUuid, quantity: 1 }, signal: new AbortController().signal };
 
   failure = new HttpException('internal details', 409);
@@ -223,7 +241,7 @@ test('failed cart reads keep quantities unknown rather than presenting an empty 
       throw new Error('unavailable');
     },
   };
-  const controller = new CartWidgetService(service, state);
+  const controller = new CartWidgetService(service, state, createNotifications());
 
   await assert.rejects(controller.loadCart(new AbortController().signal));
   assert.equal(state.getSnapshot().loaded, false);
@@ -240,7 +258,7 @@ test('changing the visitor session cancels pending reads and clears the previous
         finish = resolve;
       }),
   };
-  const controller = new CartWidgetService(service, state);
+  const controller = new CartWidgetService(service, state, createNotifications());
   const loading = controller.loadCart(new AbortController().signal);
 
   await Promise.resolve();
@@ -262,6 +280,7 @@ test('keeps the decrease indicator until socket confirmation without changing th
       setItemQuantity: async () => mutation(2),
     },
     state,
+    createNotifications(),
   );
   const changing = service.setQuantity(recordUuid, 2);
 

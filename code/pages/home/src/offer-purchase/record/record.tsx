@@ -18,7 +18,6 @@ interface IProps {
   disabled?: boolean;
   loading?: boolean;
   pendingAction?: 'increase' | 'decrease' | null;
-  error?: string;
   onChange?: (recordUuid: string, quantity: number) => void;
 }
 
@@ -32,9 +31,15 @@ export const Record: React.FC<IProps> = (props) => {
   const canIncrease =
     props.loaded &&
     !props.disabled &&
+    !props.busy &&
     !!props.record.currentPrice &&
     (props.item?.canIncrease ?? props.record.inventory.available > 0);
-  const canDecrease = props.item ? (quantity === 1 ? props.item.canRemove : props.item.canDecrease) : false;
+  const canDecrease =
+    !props.disabled && !props.busy && props.item
+      ? quantity === 1
+        ? props.item.canRemove
+        : props.item.canDecrease
+      : false;
   const change = (value: number) => {
     if (!props.busy) {
       focusAfterChange.current = true;
@@ -58,11 +63,11 @@ export const Record: React.FC<IProps> = (props) => {
           </Typography>
         </div>
       ) : null}
-      <div className={s.purchase}>
-        <Typography size="body-s" weight="semi-bold">
-          <p className={s.price}>{formatRecordPrice(props.record)}</p>
-        </Typography>
-        <div className={s.action}>
+      <Typography size="body-s" weight="semi-bold">
+        <p className={s.price}>{formatRecordPrice(props.record)}</p>
+      </Typography>
+      <div className={s.action}>
+        <div className={s.control}>
           {quantity > 0 ? (
             <div
               ref={counterRef}
@@ -85,11 +90,11 @@ export const Record: React.FC<IProps> = (props) => {
               }}
             >
               <QuantityStepper
-                size="xs"
+                size="md"
                 outline={true}
                 value={quantity}
                 loadingAction={props.loading ? (props.pendingAction === 'decrease' ? 'left' : 'right') : undefined}
-                leftActionType={quantity === 1 ? 'delete' : 'subtract'}
+                leftActionType="subtract"
                 leftActionDisabled={!canDecrease}
                 rightActionDisabled={!canIncrease}
                 onLeftActionClick={() => {
@@ -101,46 +106,41 @@ export const Record: React.FC<IProps> = (props) => {
               />
             </div>
           ) : (
-            <Button.Icon
+            <Button
               ref={buttonRef}
-              size="sm"
               type="button"
+              size="sm"
+              style="secondary"
+              target="default"
               leadIcon={<ShoppingCart2LineIcon />}
               disabled={!canIncrease}
               inProcess={props.loading}
-              aria-disabled={!canIncrease || props.busy}
-              aria-busy={props.loading}
               aria-label={`${name}. Добавить в корзину`}
-              title="Добавить в корзину"
+              aria-busy={props.loading}
               onClick={() => {
                 if (canIncrease) change(1);
               }}
-            />
+            >
+              В корзину
+            </Button>
           )}
-          <ToolTip placement="top" size="sm">
-            <ToolTip.Trigger>
-              <Button.Icon
-                type="button"
-                size="xs"
-                style="ghost"
-                leadIcon={<InformationLineIcon />}
-                aria-label={`Артикул: ${props.record.article}`}
-              />
-            </ToolTip.Trigger>
-            <ToolTip.Content>
-              <ToolTip.Content.Label>Артикул</ToolTip.Content.Label>
-              <ToolTip.Content.Caption>{props.record.article}</ToolTip.Content.Caption>
-            </ToolTip.Content>
-          </ToolTip>
         </div>
+        <ToolTip placement="top" size="sm">
+          <ToolTip.Trigger>
+            <Button.Icon
+              type="button"
+              size="xs"
+              style="ghost"
+              leadIcon={<InformationLineIcon />}
+              aria-label={`Артикул: ${props.record.article}`}
+            />
+          </ToolTip.Trigger>
+          <ToolTip.Content>
+            <ToolTip.Content.Label>Артикул</ToolTip.Content.Label>
+            <ToolTip.Content.Caption>{props.record.article}</ToolTip.Content.Caption>
+          </ToolTip.Content>
+        </ToolTip>
       </div>
-      {props.error ? (
-        <Typography size="caption-l" weight="regular">
-          <p className={s.error} role="alert">
-            {props.error}
-          </p>
-        </Typography>
-      ) : null}
     </div>
   );
 };

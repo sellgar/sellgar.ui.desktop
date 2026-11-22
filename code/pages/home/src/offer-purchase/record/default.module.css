@@ -1,11 +1,11 @@
 .wrapper {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: subgrid;
+  grid-column: 1 / -1;
   align-items: center;
-  gap: var(--numbers-12);
-  padding: var(--numbers-8) var(--numbers-12);
-  border-radius: var(--measurements-radius-lg);
-  background: var(--background-surface-neutral);
+  row-gap: var(--numbers-8);
+  padding-block: var(--numbers-12);
+  border-bottom: var(--numbers-1) solid var(--border-base-divider);
   min-width: 0;
 }
 
@@ -24,17 +24,11 @@
 }
 
 .action {
+  grid-column: -2;
   display: flex;
   align-items: center;
-  gap: var(--numbers-4);
+  gap: var(--numbers-8);
   font-variant-numeric: tabular-nums;
-}
-
-.error {
-  grid-column: 1 / -1;
-  margin: 0;
-  color: var(--text-accent-red);
-  overflow-wrap: anywhere;
 }
 
 .counter {
@@ -48,23 +42,23 @@
   }
 }
 
-.purchase {
-  display: flex;
-  grid-column: 1 / -1;
+.control {
+  display: grid;
   align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: var(--numbers-12);
-  min-width: 0;
-}
-
-.details + .purchase {
-  grid-column: auto;
-  justify-content: flex-end;
+  width: var(--numbers-128);
+  min-height: var(--numbers-32);
 }
 
 .price {
+  grid-column: -3;
   margin: 0;
+  min-width: 0;
   color: var(--text-base-primary);
   font-variant-numeric: tabular-nums;
+}
+
+@container (max-width: 360px) {
+  .details {
+    grid-column: 1 / -1;
+  }
 }

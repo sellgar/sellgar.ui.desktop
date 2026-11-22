@@ -27,7 +27,6 @@ export const Purchase: React.FC = () => {
             .then((app) => app.getDependency(CartWidgetServiceInterface).setQuantity(recordUuid, quantity))
             .catch(() => undefined);
       }}
-      error={state.error?.message}
       failedToLoad={state.failedToLoad}
     />
   );

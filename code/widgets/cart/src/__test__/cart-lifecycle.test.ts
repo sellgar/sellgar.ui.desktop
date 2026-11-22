@@ -89,7 +89,9 @@ const setup = () => {
       throw new Error('Unused');
     },
   };
-  const service = new CartWidgetService(domain, state);
+  const service = new CartWidgetService(domain, state, {
+    show: () => ({ id: 'test', close: () => undefined }),
+  });
 
   class TestBindings {
     register(registry: BindingRegistryInterface) {

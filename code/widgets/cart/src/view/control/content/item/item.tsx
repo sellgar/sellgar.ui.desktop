@@ -106,11 +106,6 @@ export const Item: React.FC<IProps> = (props) => {
           </span>
         </div>
       </div>
-      {active && state.error ? (
-        <p className={s.error} role="alert">
-          {state.error.message}
-        </p>
-      ) : null}
     </li>
   );
 };
